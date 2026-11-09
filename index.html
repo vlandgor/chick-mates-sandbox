@@ -80,6 +80,8 @@ h1{font-family:var(--font-d);font-size:1.3rem;font-weight:800;margin:0;letter-sp
 .jumpbar button{font:600 .9rem var(--font-b);padding:14px 10px;border-radius:12px;cursor:pointer;
   border:1px solid var(--line);background:var(--panel);color:var(--ink);display:flex;flex-direction:column;gap:3px;align-items:center}
 .jumpbar button small{font:600 .68rem var(--font-m);color:var(--muted);letter-spacing:.04em}
+kbd{font:600 .62rem var(--font-m);border:1px solid var(--line);border-bottom-width:2px;
+  border-radius:4px;padding:1px 5px;color:var(--muted);margin-left:2px}
 .jumpbar button{border-width:2px}
 #jL{border-color:color-mix(in srgb,var(--chickL) 55%,var(--line))}
 #jR{border-color:color-mix(in srgb,var(--chickR) 55%,var(--line))}
@@ -135,8 +137,8 @@ ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;co
 <div class="boardwrap"><div class="board" id="board"></div><div id="banner"></div></div>
 
 <div class="jumpbar" id="jumpbar">
-  <button id="jL">🐤 Left chick<small>↻ CLOCKWISE</small></button>
-  <button id="jR">🐤 Right chick<small>↺ COUNTER-CW</small></button>
+  <button id="jL">🐤 Left chick <kbd>A</kbd><small>↻ CLOCKWISE</small></button>
+  <button id="jR">🐤 Right chick <kbd>D</kbd><small>↺ COUNTER-CW</small></button>
 </div>
 
 <div class="status">
@@ -723,6 +725,23 @@ function setMode(m){
 }
 document.getElementById("jL").onclick=()=>jump("a");
 document.getElementById("jR").onclick=()=>jump("b");
+
+/* keyboard: A / left arrow for the left chick, D / right arrow for the right one */
+document.addEventListener("keydown",e=>{
+  const t=e.target, tag=t&&t.tagName;
+  if(tag==="INPUT"||tag==="TEXTAREA"||(t&&t.isContentEditable))return;
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key.toLowerCase();
+  let hit=null;
+  if(k==="a"||k==="arrowleft")hit="jL";
+  else if(k==="d"||k==="arrowright")hit="jR";
+  else if(k==="z")hit="bUndo";
+  else if(k==="r")hit="bReset";
+  if(!hit)return;
+  e.preventDefault();
+  const b=document.getElementById(hit);
+  if(b&&!b.closest("[hidden]"))b.click();
+});
 document.getElementById("mPlay").onclick=()=>setMode("play");
 document.getElementById("mEdit").onclick=()=>setMode("edit");
 document.getElementById("bUndo").onclick=()=>{
