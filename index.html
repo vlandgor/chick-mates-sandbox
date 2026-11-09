@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>Chick Mates Sandbox</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=Public+Sans:wght@400;600&display=swap">
@@ -155,7 +160,8 @@ ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;co
 .hint{font:.76rem/1.5 var(--font-b);color:var(--muted);margin:0 0 10px}
 @media (prefers-reduced-motion:no-preference){.cell{transition:box-shadow .12s}}
 </style>
-
+</head>
+<body>
 <div class="topbar">
   <button id="levelsBtn" aria-expanded="false">☰ Levels</button>
   <h1>Chick Mates Sandbox</h1>
@@ -901,3 +907,5 @@ level=fixLevel(JSON.parse(JSON.stringify(CAMPAIGN[0])));
 syncFields(); renderSaves(); setMode("play");
 window.addEventListener("resize",render);
 </script>
+</body>
+</html>

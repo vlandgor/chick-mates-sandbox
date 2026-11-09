@@ -4,7 +4,13 @@ A browser prototype for designing and testing **Chick Mates** puzzle situations
 without building them in Unity. Paint a grid, play it immediately, export it as
 JSON.
 
-Open `index.html` in any browser. No build step, no dependencies, no server.
+Open `index.html` in any browser, or the published page. No dependencies, no
+server.
+
+`src/sandbox.html` is the source of truth. It carries no `<!doctype>` or `<head>`
+of its own because the Claude artifact host supplies them; `node tools/wrap.js`
+adds that shell and writes `index.html` for GitHub Pages. Edit the source, run
+the wrapper, commit both.
 
 ## The mechanic
 
@@ -81,6 +87,7 @@ that levels are solvable and to measure them.
 ```
 node tools/build.js      # build + verify the whole campaign
 node tools/gen.js        # write levels/Level_NN.json one file per level
+node tools/wrap.js       # regenerate index.html from src/sandbox.html
 ```
 
 - `engine.js` — the rules, mirroring `index.html`
