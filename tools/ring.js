@@ -29,3 +29,34 @@ function shift(e){
   return e;
 }
 module.exports={addRing};
+
+/* Widens the dry part of a board by n tiles on every side. Used to keep the
+   learning levels' playing area clear of the waterline without railing it. */
+function padGrass(L,n){
+  const C=L.cols,R=L.rows,C2=C+2*n,R2=R+2*n;
+  const o={...L,cols:C2,rows:R2,
+    terrain:Array(C2*R2).fill("ground"),
+    content:Array(C2*R2).fill(null),
+    h:Array(C2*R2).fill(null),v:Array(C2*R2).fill(null)};
+  for(let y=0;y<R;y++)for(let x=0;x<C;x++){
+    const s=y*C+x,d=(y+n)*C2+(x+n);
+    o.terrain[d]=L.terrain[s];
+    o.content[d]=L.content[s];
+    o.h[d]=shiftBy(L.h&&L.h[s],n);
+    o.v[d]=shiftBy(L.v&&L.v[s],n);
+  }
+  const p=t=>[t[0]+n,t[1]+n];
+  o.a={x:L.a.x+n,y:L.a.y+n};
+  o.b={x:L.b.x+n,y:L.b.y+n};
+  if(L.rabbit)o.rabbit={x:L.rabbit.x+n,y:L.rabbit.y+n};
+  if(L.coyote&&L.coyote.path)o.coyote={...L.coyote,path:L.coyote.path.map(p)};
+  if(L.eagle&&L.eagle.tiles)o.eagle={...L.eagle,tiles:L.eagle.tiles.map(p)};
+  return o;
+}
+function shiftBy(e,n){
+  if(!e)return null;
+  if(e==="fence")return "fence";
+  if(e.g)return {g:1,h:[e.h[0]+n,e.h[1]+n]};
+  return e;
+}
+module.exports.padGrass=padGrass;

@@ -67,27 +67,12 @@ the only objective. Every board is framed by one tile of water; `tools/gen.js`
 adds that frame, which is why the ASCII maps in `tools/levels.js` show only the
 interior.
 
-Whether the water bites depends on what the level is for. Levels that teach — a
-tutorial, a new mechanic, practice, or a recovery breather — have a fence along
-the shoreline, so a press into the rim turns the pair around and the level
-cannot be lost to a stray tap. Levels that test leave the water live. Chapter
-one is fenced throughout whatever its levels are for, because nothing there has
-taught the player that water is dangerous; the first live shoreline is level 13.
-Each level records its `type` so the rule is visible in the file. Every one is machine-verified solvable; each file's `notes`
-field carries its chapter, design intent, target difficulty and shortest
-solution as a press sequence.
-
-Import a single level, or paste an array of them to load the whole campaign into
-the saved list at once.
-
-Two caveats carried in the files themselves:
-
-- **Levels 08–09** are placeholders. The campaign design calls for a *one-way*
-  gate there; the game has only the swinging gate, so they teach swing
-  sequencing instead.
-- **Level_24** can be made unwinnable from about a quarter of its reachable
-  states — the gate can be swung into a position that seals the only crossing.
-  Deliberate at that point in the campaign, but worth revisiting.
+Falling in is a normal way to lose, so the waterline is open by default. Two
+things soften it, both deliberate rather than automatic. Chapter one's boards
+carry an extra tile of grass margin, which keeps the learning area clear of the
+coast without pretending the coast is safe. And a level can name a `seawall`
+side, which fences the waterline along one edge only — a wall the player can
+see and lean on. Levels 1 and 10 use one; the rest are open water.
 
 ## Tools
 

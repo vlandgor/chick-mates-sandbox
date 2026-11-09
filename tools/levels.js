@@ -3,7 +3,7 @@
 
 module.exports=[
 /* ================= Chapter 1 — learning the basics ================= */
-{n:1,type:"tutorial",target:1,name:"01 · First steps",
+{n:1,seawall:"w",type:"tutorial",target:1,name:"01 · First steps",
  notes:"Two presses, two chicks, nothing in the way. Teaches that a press moves one chick around the other and that the pair must finish side by side in the coops.",
  map:`
 .....
@@ -96,7 +96,7 @@ module.exports=[
 ..TCC..
 .......`},
 
-{n:10,type:"major",target:5,name:"10 · Yard and barn",
+{n:10,seawall:"s",type:"major",target:5,name:"10 · Yard and barn",
  notes:"Boxes and gates in one puzzle, and a box that can be shoved into the gate's swing arc to stop it opening. First real test of chapter one.",
  fences:["4,1:w"],
  gates:["4,3:w@4,3"],

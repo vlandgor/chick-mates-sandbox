@@ -1,13 +1,13 @@
 const fs=require("fs");
 const {parse}=require("./build");
 const {solve,deadEnds}=require("./solver");
-const {addRing}=require("./ring");
-const {fenceShore}=require("./shore");
+const {addRing,padGrass}=require("./ring");
+const {fenceShoreSide}=require("./shore");
 const E=require("./engine");
 const defs=require("./levels.js").slice();
 
 /* the three built and reviewed individually replace their earlier drafts */
-defs[0]={n:1,type:"tutorial",target:1,name:"Movement explanation",
+defs[0]={n:1,seawall:"w",type:"tutorial",target:1,name:"Movement explanation",
  notes:"Chapter 1 · Movement explanation. Target difficulty 1/10.\n\nTeaches the two controls and the one rule behind them: a press sends that chick one tile around the other, which stays put as the anchor. The left chick circles clockwise, the right one counter-clockwise, so the pair walks by alternating.\n\nNothing on the board can block, push or kill. The only thing to learn is that both chicks must stand in the coops at once.",
  map:`
 ......
@@ -53,10 +53,14 @@ defs.forEach((def,i)=>{
      is live. Chapter one is fenced throughout whatever its levels are for,
      because nothing there has taught the player that water is dangerous: the
      first live shoreline is level 13. */
-  const TEACHES=["tutorial","practice","new","recovery"];
-  const safe=(def.n<=10)||TEACHES.includes(def.type);
-  let lvl=addRing(parse({...def,name:id}));
-  if(safe)lvl=fenceShore(lvl);
+  /* Every board is framed by one tile of water and falling in is a normal
+     way to lose, so the waterline is open by default. Chapter one gets a
+     tile of grass margin instead of a rail, which keeps the learning area
+     clear of the coast without pretending the coast is safe. A seawall is
+     an occasional design element, named per level, not a default. */
+  const base=parse({...def,name:id});
+  let lvl=addRing(def.n<=10?padGrass(base,1):base);
+  if(def.seawall)lvl=fenceShoreSide(lvl,def.seawall);
   const r=solve(lvl);
   const d=r.solvable?deadEnds(lvl):null;
   if(!r.solvable){console.log(id,"UNSOLVABLE");return;}
