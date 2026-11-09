@@ -1,0 +1,816 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Chick Mates Sandbox</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=Public+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: single column — board first, controls stacked beneath, panels collapse */
+:root{
+  --bg:#f2f4f1; --panel:#ffffff; --ink:#1d2420; --muted:#66736c;
+  --line:#d9dfda; --grass:#cfe0c3; --grass2:#c4d8b6; --water:#7fa8c9;
+  --accent:#e2a32b; --danger:#c4553d; --good:#4f8f58;
+  --chickL:#2f6f9e; --chickR:#a8456f; --fence:#7d5732; --gate:#2f7f6a;
+  --font-d:"Bricolage Grotesque",Georgia,serif;
+  --font-b:"Public Sans",system-ui,sans-serif;
+  --font-m:"IBM Plex Mono",ui-monospace,monospace;
+  --cell:32px; --cols:12;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#171b19; --panel:#1f2522; --ink:#e8ede9; --muted:#95a39b;
+  --line:#2e3733; --grass:#39483a; --grass2:#33412f; --water:#2d4f6b;
+  --accent:#e8b24a; --danger:#d9674c; --good:#6bb073;
+  --chickL:#5ca5d8; --chickR:#e07aa6; --fence:#c3915a; --gate:#5cc0a4; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#171b19; --panel:#1f2522; --ink:#e8ede9; --muted:#95a39b;
+  --line:#2e3733; --grass:#39483a; --grass2:#33412f; --water:#2d4f6b;
+  --accent:#e8b24a; --danger:#d9674c; --good:#6bb073;
+  --chickL:#5ca5d8; --chickR:#e07aa6; --fence:#c3915a; --gate:#5cc0a4; color-scheme:dark;}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-b);
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:14px 40px;max-width:720px;margin:0 auto}
+h1{font-family:var(--font-d);font-size:1.3rem;font-weight:800;margin:0;letter-spacing:-.01em}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;color:var(--muted);font:600 .8rem var(--font-b);padding:7px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+.boardwrap{position:relative;overflow-x:auto;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.board{display:grid;grid-template-columns:repeat(var(--cols),var(--cell));gap:2px;margin:0 auto;width:max-content}
+.cell{width:var(--cell);height:var(--cell);border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-size:calc(var(--cell)*.6);line-height:1;cursor:pointer;position:relative;user-select:none;
+  background:var(--grass);border:1px solid transparent}
+.cell.alt{background:var(--grass2)}
+.cell.water{background:var(--water)}
+.cell.danger::after{content:"";position:absolute;inset:0;border-radius:4px;z-index:2;pointer-events:none;
+  background:color-mix(in srgb,var(--danger) 34%,transparent)}
+.cell.path{outline:1px dashed color-mix(in srgb,var(--danger) 55%,transparent);outline-offset:-3px}
+.pnum{position:absolute;bottom:0;right:2px;z-index:5;font:600 .5rem var(--font-m);
+  color:var(--danger);line-height:1.2}
+.cell.etile{outline:1px dotted color-mix(in srgb,var(--accent) 80%,transparent);outline-offset:-3px}
+.enum{position:absolute;top:0;right:2px;z-index:5;font:600 .5rem var(--font-m);
+  color:var(--accent);line-height:1.2}
+.count{position:absolute;top:-3px;right:-2px;z-index:5;font:700 .55rem var(--font-m);color:#fff;
+  background:var(--danger);border-radius:4px;padding:0 3px;line-height:1.5}
+.cell.coop{background:repeating-linear-gradient(45deg,var(--grass2),var(--grass2) 4px,color-mix(in srgb,var(--accent) 45%,var(--grass2)) 4px,color-mix(in srgb,var(--accent) 45%,var(--grass2)) 8px);
+  border-color:var(--accent)}
+.cell.chk{box-shadow:inset 0 0 0 3px var(--c);background:color-mix(in srgb,var(--c) 22%,var(--grass))}
+.cell.pinned{box-shadow:inset 0 0 0 3px var(--c),inset 0 0 0 6px color-mix(in srgb,var(--c) 30%,transparent)}
+.ed{position:absolute;z-index:3;border-radius:2px;background:var(--fence)}
+.ed.gate{background:var(--gate)}
+.hinge{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--ink);
+  border:1.5px solid var(--gate);box-sizing:border-box}
+.ed.n .hinge{top:-2px}
+.ed.n .hinge.s{left:-4px}
+.ed.n .hinge.e{right:-4px}
+.ed.w .hinge{left:-2px}
+.ed.w .hinge.s{top:-4px}
+.ed.w .hinge.e{bottom:-4px}
+.ed.n{top:-3px;left:6%;right:6%;height:4px}
+.ed.w{left:-3px;top:6%;bottom:6%;width:4px}
+.hot{position:absolute;z-index:4;background:color-mix(in srgb,var(--ink) 14%,transparent);border-radius:3px}
+.hot:hover{background:color-mix(in srgb,var(--accent) 65%,transparent)}
+.hot.n{top:-6px;left:15%;right:15%;height:12px}
+.hot.w{left:-6px;top:15%;bottom:15%;width:12px}
+.tag{position:absolute;top:-1px;left:1px;font:600 .52rem var(--font-m);color:#fff;background:var(--c);
+  border-radius:0 0 4px 0;padding:1px 3px;line-height:1}
+.arw{position:absolute;font:700 .62rem var(--font-m);color:var(--c);line-height:1;
+  transform:translate(-50%,-50%);text-shadow:0 0 2px var(--panel),0 0 2px var(--panel)}
+.jumpbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 4px}
+.jumpbar button{font:600 .9rem var(--font-b);padding:14px 10px;border-radius:12px;cursor:pointer;
+  border:1px solid var(--line);background:var(--panel);color:var(--ink);display:flex;flex-direction:column;gap:3px;align-items:center}
+.jumpbar button small{font:600 .68rem var(--font-m);color:var(--muted);letter-spacing:.04em}
+.jumpbar button{border-width:2px}
+#jL{border-color:color-mix(in srgb,var(--chickL) 55%,var(--line))}
+#jR{border-color:color-mix(in srgb,var(--chickR) 55%,var(--line))}
+#jL small{color:var(--chickL)}
+#jR small{color:var(--chickR)}
+.jumpbar button.live{box-shadow:inset 0 0 0 2px var(--c,var(--accent))}
+#jL.live{--c:var(--chickL)}
+#jR.live{--c:var(--chickR)}
+.jumpbar button:hover{border-color:var(--muted)}
+.cell:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.status{display:flex;gap:14px;flex-wrap:wrap;font:600 .8rem var(--font-m);color:var(--muted);margin:12px 0 10px}
+.status b{color:var(--ink);font-variant-numeric:tabular-nums}
+.banner{position:absolute;left:10px;right:10px;bottom:10px;z-index:2;pointer-events:none;
+  padding:8px 11px;border-radius:8px;font:600 .8rem var(--font-b);
+  backdrop-filter:blur(2px);box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.banner.win{background:color-mix(in srgb,var(--good) 32%,var(--panel));color:var(--good)}
+.banner.bad{background:color-mix(in srgb,var(--danger) 26%,var(--panel));color:var(--danger)}
+
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+button.btn{font:600 .8rem var(--font-b);padding:8px 13px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer}
+button.btn:hover{border-color:var(--muted)}
+.tool{display:flex;align-items:center;gap:6px}
+.tool[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.swatch{width:14px;height:14px;border-radius:3px;border:1px solid var(--line)}
+
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px}
+summary{font:600 .82rem var(--font-b);cursor:pointer}
+label{display:block;font:600 .72rem var(--font-b);color:var(--muted);margin:10px 0 4px;letter-spacing:.04em;text-transform:uppercase}
+input[type=text],textarea,input[type=number]{width:100%;font:.8rem var(--font-m);padding:7px 9px;border-radius:7px;
+  border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{min-height:90px;resize:vertical}
+.inline{display:flex;gap:10px;align-items:flex-end}
+.inline>div{flex:1;min-width:0}
+ul.saves{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:6px}
+ul.saves li{display:flex;gap:8px;align-items:center;justify-content:space-between;font:.8rem var(--font-b);
+  border:1px solid var(--line);border-radius:7px;padding:6px 9px}
+ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;color:var(--accent);cursor:pointer;padding:2px 4px}
+.hint{font:.76rem/1.5 var(--font-b);color:var(--muted);margin:0 0 10px}
+@media (prefers-reduced-motion:no-preference){.cell{transition:box-shadow .12s}}
+</style>
+
+<div class="topbar">
+  <h1>Chick Mates Sandbox</h1>
+  <div class="seg">
+    <button id="mPlay" aria-pressed="true">Play</button>
+    <button id="mEdit" aria-pressed="false">Edit</button>
+  </div>
+</div>
+
+<p class="hint" id="hint"></p>
+<div class="boardwrap"><div class="board" id="board"></div><div id="banner"></div></div>
+
+<div class="jumpbar" id="jumpbar">
+  <button id="jL">🐤 Left chick<small>↻ CLOCKWISE</small></button>
+  <button id="jR">🐤 Right chick<small>↺ COUNTER-CW</small></button>
+</div>
+
+<div class="status">
+  <span>Steps <b id="sSteps">0</b></span>
+  <span>Berries <b id="sBerries">0/0</b></span>
+  <span>Anchor <b id="sAnchor">A</b></span>
+  <span>Coops <b id="sCoops">—</b></span>
+  <span>Rabbit <b id="sRabbit">free</b></span>
+</div>
+
+<div class="row" id="playRow">
+  <button class="btn" id="bUndo">Undo</button>
+  <button class="btn" id="bReset">Reset</button>
+  <button class="btn" id="bDirs">Moves: 8-way</button>
+  <button class="btn" id="bTurn">Bump turns: both chicks</button>
+</div>
+
+<div class="row" id="editRow" hidden></div>
+
+<details id="dSize">
+  <summary>Board &amp; situation</summary>
+  <div class="inline">
+    <div><label for="iCols">Columns</label><input type="number" id="iCols" min="3" max="16" value="9"></div>
+    <div><label for="iRows">Rows</label><input type="number" id="iRows" min="3" max="16" value="8"></div>
+    <button class="btn" id="bResize">Apply</button>
+  </div>
+  <label for="iName">Name</label>
+  <input type="text" id="iName" placeholder="Irreversible box positioning">
+  <label for="iNotes">Notes — decision, outcome, verdict</label>
+  <textarea id="iNotes" placeholder="What choice does the player face? What happened? Fun / confusing / unfair?"></textarea>
+  <div class="row" style="margin-top:10px">
+    <button class="btn" id="bSave">Save situation</button>
+    <button class="btn" id="bClear">Clear board</button>
+  </div>
+  <ul class="saves" id="savesList"></ul>
+</details>
+
+<details id="dJson">
+  <summary>JSON</summary>
+  <label for="iJson">Level data — one level, or an array of them</label>
+  <textarea id="iJson" spellcheck="false"></textarea>
+  <div class="row" style="margin-top:10px">
+    <button class="btn" id="bExport">Export</button>
+    <button class="btn" id="bImport">Import</button>
+    <button class="btn" id="bCopy">Copy</button>
+  </div>
+</details>
+
+<script>
+const GLYPH={tree:"🌳",box:"📦",berry:"🍓",coop:"🏠",bear:"🐻"};
+/* arrows indexed by (dy+1)*3+(dx+1) */
+const ARROW=["↖","↑","↗","←","•","→","↙","↓","↘"];
+const D4=[[0,-1],[1,0],[0,1],[-1,0]];
+const D8=D4.concat([[1,-1],[1,1],[-1,1],[-1,-1]]);
+let eightWay=true, sharedTurn=true;
+
+function blank(cols,rows){
+  return {cols,rows,name:"",notes:"",
+    terrain:Array(cols*rows).fill("ground"),
+    content:Array(cols*rows).fill(null),
+    a:{x:1,y:Math.floor(rows/2)}, b:{x:2,y:Math.floor(rows/2)},
+    h:Array(cols*rows).fill(null), v:Array(cols*rows).fill(null),
+    coyote:null, eagle:{tiles:[]},
+    anchor:"a", dir:{a:true,b:false}, rabbit:{x:cols-2,y:Math.floor(rows/2)}};
+}
+let level=blank(9,8);
+let game=JSON.parse(JSON.stringify(level));
+let mode="play", tool="tree", undoStack=[], msg=null, won=false;
+
+const I=(s,x,y)=>y*s.cols+x;
+const inB=(s,x,y)=>x>=0&&y>=0&&x<s.cols&&y<s.rows;
+const mateAt=(s,x,y)=>(s.a.x===x&&s.a.y===y)?"a":((s.b.x===x&&s.b.y===y)?"b":null);
+const dirs=()=>eightWay?D8:D4;
+
+function walkable(s,x,y){
+  if(!inB(s,x,y))return false;
+  if(s.terrain[I(s,x,y)]==="water")return false;
+  const c=s.content[I(s,x,y)];
+  if(c==="tree"||c==="box"||c==="bear")return false;
+  if(mateAt(s,x,y))return false;
+  if(s.rabbit&&s.rabbit.x===x&&s.rabbit.y===y)return false;
+  return true;
+}
+function berriesTotal(s){let n=0;for(const c of s.content)if(c==="berry")n++;return n;}
+
+/* ---------- fences and gates live on the edges between tiles ----------
+   h[y*cols+x] is the edge below tile (x,y); v[y*cols+x] is the edge to its right.
+   A fence stops everything. A gate lets the chicks and the rabbit through
+   but will not let a box be pushed across it. */
+function ensureEdges(s){
+  if(!s.h)s.h=Array(s.cols*s.rows).fill(null);
+  if(!s.v)s.v=Array(s.cols*s.rows).fill(null);
+  return s;
+}
+const isGate=v=>!!(v&&v.g);
+/* which slot in h/v holds the edge between (x,y) and its neighbour in (dx,dy) */
+function edgeRef(s,x,y,dx,dy){
+  ensureEdges(s);
+  if(dx===1)return{a:"v",i:y*s.cols+x};
+  if(dx===-1)return (x>0)?{a:"v",i:y*s.cols+x-1}:null;
+  if(dy===1)return{a:"h",i:y*s.cols+x};
+  return (y>0)?{a:"h",i:(y-1)*s.cols+x}:null;
+}
+function edgeVal(s,x,y,dx,dy){
+  const r=edgeRef(s,x,y,dx,dy);
+  return r?(s[r.a][r.i]||null):null;
+}
+/* the slot holding the one-tile segment between two grid corners */
+function segRef(s,P,Q){
+  ensureEdges(s);
+  const vx=Math.min(P[0],Q[0]), vy=Math.min(P[1],Q[1]);
+  if(P[0]===Q[0]){
+    if(vx<1||vx>s.cols-1||vy<0||vy>s.rows-1)return null;
+    return{a:"v",i:vy*s.cols+(vx-1)};
+  }
+  if(vy<1||vy>s.rows-1||vx<0||vx>s.cols-1)return null;
+  return{a:"h",i:(vy-1)*s.cols+vx};
+}
+/* the two corners of a tile's north or west edge */
+function edgeVertices(x,y,side){
+  return (side==="n")?[[x,y],[x+1,y]]:[[x,y],[x,y+1]];
+}
+/* A chick shoves a gate: it swings 90 degrees about its hinge, in the
+   direction of the push, onto the neighbouring edge. */
+function swingGate(s,x,y,dx,dy){
+  const ref=edgeRef(s,x,y,dx,dy); if(!ref)return false;
+  const g=s[ref.a][ref.i]; if(!isGate(g))return false;
+  const H=g.h, P=[H[0]+dx,H[1]+dy];
+  const tgt=segRef(s,H,P);
+  if(!tgt||s[tgt.a][tgt.i])return false;   /* no room to swing */
+  s[ref.a][ref.i]=null;
+  s[tgt.a][tgt.i]={g:1,h:[H[0],H[1]]};
+  return true;
+}
+function setEdge(s,x,y,side,val){
+  ensureEdges(s);
+  if(side==="n")s.h[(y-1)*s.cols+x]=val; else s.v[y*s.cols+x-1]=val;
+}
+/* step a gate through: absent, hinged at one corner, hinged at the other, absent */
+function cycleGate(s,x,y,side){
+  const cur=getEdge(s,x,y,side), [v0,v1]=edgeVertices(x,y,side);
+  if(!isGate(cur))setEdge(s,x,y,side,{g:1,h:v0});
+  else if(cur.h[0]===v0[0]&&cur.h[1]===v0[1])setEdge(s,x,y,side,{g:1,h:v1});
+  else setEdge(s,x,y,side,null);
+}
+function getEdge(s,x,y,side){
+  ensureEdges(s);
+  return (side==="n")?(s.h[(y-1)*s.cols+x]||null):(s.v[y*s.cols+x-1]||null);
+}
+/* can something cross from one tile to the next? */
+function crossing(s,x1,y1,x2,y2,isBox){
+  const dx=x2-x1, dy=y2-y1;
+  const stop=v=>(v==="fence")||isGate(v);
+  if(dx===0||dy===0)return !stop(edgeVal(s,x1,y1,dx,dy));
+  /* diagonal: fine if either L-shaped route around the corner is open */
+  const legA=inB(s,x1+dx,y1)&&!stop(edgeVal(s,x1,y1,dx,0))&&!stop(edgeVal(s,x1+dx,y1,0,dy));
+  const legB=inB(s,x1,y1+dy)&&!stop(edgeVal(s,x1,y1,0,dy))&&!stop(edgeVal(s,x1,y1+dy,dx,0));
+  return legA||legB;
+}
+
+/* ---------- rules ---------- */
+/* 8 orbit slots, clockwise from north (y grows downward) */
+const CW8=[[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]];
+function slotOf(dx,dy){for(let i=0;i<8;i++)if(CW8[i][0]===dx&&CW8[i][1]===dy)return i;return -1;}
+function nextSlot(i,cw){
+  const step=cw?1:7;
+  let j=(i<0)?(cw?7:1):i;
+  do{ j=(j+step)%8; }while(!eightWay&&j%2===1);
+  return j;
+}
+/* Blocked ahead? The chick steps one tile BACK along its own orbit instead.
+   Left chick turns clockwise, right chick counter-clockwise. */
+function slotTile(s,who,j){
+  const an=s[who==="a"?"b":"a"];
+  return [an.x+CW8[j][0], an.y+CW8[j][1]];
+}
+function landable(s,x,y){
+  if(!inB(s,x,y))return false;
+  if(s.terrain[I(s,x,y)]==="water")return false;
+  const c=s.content[I(s,x,y)];
+  if(c==="tree"||c==="box"||c==="bear")return false;
+  if(mateAt(s,x,y))return false;
+  if(s.rabbit&&s.rabbit.x===x&&s.rabbit.y===y)return false;
+  return true;
+}
+
+/* Each chick carries its own turn direction. Left starts clockwise,
+   right starts counter-clockwise, and a hard block flips it for good. */
+function dirOf(s,who){
+  if(!s.dir)s.dir={a:true,b:false};
+  return s.dir[who];
+}
+
+function jump(who){
+  if(won||mode!=="play")return;
+  const s=game;
+  const cw=dirOf(s,who);
+  const mv=s[who], an=s[who==="a"?"b":"a"];
+  const cur=slotOf(mv.x-an.x,mv.y-an.y);
+  const fwd=nextSlot(cur,cw);
+  const [fx,fy]=slotTile(s,who,fwd);
+
+  undoStack.push(JSON.stringify({g:s,m:msg}));
+  s.anchor=(who==="a")?"b":"a";
+
+  /* water ahead is a real landing — and a fatal one, unless a fence is in the way */
+  if(inB(s,fx,fy)&&s.terrain[I(s,fx,fy)]==="water"&&crossing(s,mv.x,mv.y,fx,fy,false)){
+    msg={t:"bad",s:"A chick landed in the water — level restarted."};
+    game=JSON.parse(JSON.stringify(level)); game.steps=0; initEagle(game); undoStack=[]; render(); return;
+  }
+
+  const fi=inB(s,fx,fy)?I(s,fx,fy):-1;
+  const blockedByEdge=(fi<0)||!crossing(s,mv.x,mv.y,fx,fy,false);
+  /* a gate straight ahead swings open instead of stopping the chick */
+  let swung=false;
+  if(blockedByEdge&&fi>=0&&(fx===mv.x||fy===mv.y))
+    swung=swingGate(s,mv.x,mv.y,fx-mv.x,fy-mv.y);
+  const box=(!blockedByEdge&&fi>=0&&s.content[fi]==="box");
+  let pushed=false;
+  let sank=false;
+  if(box){
+    const bx=fx+Math.sign(fx-mv.x), by=fy+Math.sign(fy-mv.y);
+    const bi=inB(s,bx,by)?I(s,bx,by):-1;
+    const canCross=(bi>=0)&&crossing(s,fx,fy,bx,by,true);
+    const clear=canCross&&!s.content[bi]&&!mateAt(s,bx,by)&&!(s.rabbit&&s.rabbit.x===bx&&s.rabbit.y===by);
+    if(clear&&s.terrain[bi]==="water"){
+      s.content[fi]=null; pushed=true; sank=true;
+    }else if(canCross&&landable(s,bx,by)){
+      s.content[bi]="box"; s.content[fi]=null; pushed=true;
+    }
+  }
+
+  if(swung){
+    /* nudged the gate open, held its own tile and its direction */
+    msg={t:"bad",s:"Gate swung open — the chick stayed put."};
+  }else if(pushed){
+    /* shoved the box, held its own tile */
+    msg={t:"bad",s:sank?"Box went into the water and was lost.":"Box pushed — the chick stayed put."};
+  }else if(!blockedByEdge&&landable(s,fx,fy)){
+    if(s.content[fi]==="berry")s.content[fi]=null;
+    mv.x=fx; mv.y=fy; msg=null;
+  }else{
+    /* hard block: turn around and go the other way from now on */
+    if(sharedTurn){ s.dir.a=!s.dir.a; s.dir.b=!s.dir.b; }
+    else { s.dir[who]=!cw; }
+    msg={t:"bad",s:sharedTurn
+      ?"Blocked — both chicks turned around."
+      :"Blocked — the chick turned around. Next press goes the other way."};
+  }
+
+  s.steps=(s.steps||0)+1;
+  moveRabbit(s);
+  const bear=stepBears(s), coy=stepCoyote(s)||coyoteCaught(s), air=stepEagle(s);
+  if(bear||coy||air){
+    msg={t:"bad",s:bear?"The bear struck — level restarted."
+      :coy?"The coyote caught a chick — level restarted."
+      :"The eagle struck — level restarted."};
+    game=JSON.parse(JSON.stringify(level)); game.steps=0; initEagle(game); undoStack=[]; render(); return;
+  }
+  checkWin(s);
+  render();
+}
+
+function moveRabbit(s){
+  if(!s.rabbit)return;
+  const opts=[];
+  for(const[dx,dy]of D4){
+    const x=s.rabbit.x+dx,y=s.rabbit.y+dy;
+    if(!walkable(s,x,y))continue;
+    if(!crossing(s,s.rabbit.x,s.rabbit.y,x,y,false))continue;
+    if(nearMate(s,x,y))continue;
+    opts.push([x,y]);
+  }
+  if(!opts.length)return;
+  let best=opts[0],bd=-1;
+  for(const[x,y]of opts){
+    const d=Math.min(dist(x,y,s.a),dist(x,y,s.b));
+    if(d>bd){bd=d;best=[x,y];}
+  }
+  s.rabbit.x=best[0]; s.rabbit.y=best[1];
+}
+function dist(x,y,m){return Math.abs(x-m.x)+Math.abs(y-m.y);}
+
+/* ---------- bear ----------
+   Sits still. A chick stepping inside its one-tile radius arms it; three
+   steps later it mauls that whole radius. The countdown then resets. */
+function bearTiles(s){
+  const out=[];
+  for(let i=0;i<s.content.length;i++)if(s.content[i]==="bear")out.push(i);
+  return out;
+}
+function stepBears(s){
+  if(!s.bearT)s.bearT={};
+  let mauled=false;
+  for(const i of bearTiles(s)){
+    const bx=i%s.cols, by=Math.floor(i/s.cols);
+    const near=nearMate(s,bx,by);
+    if(s.bearT[i]==null){
+      if(near)s.bearT[i]=3;
+    }else{
+      s.bearT[i]--;
+      if(s.bearT[i]<=0){
+        if(nearMate(s,bx,by))mauled=true;
+        s.bearT[i]=null;
+      }
+    }
+  }
+  return mauled;
+}
+/* ---------- coyote ----------
+   Paces the path the designer taps out, one tile per step, turning
+   around at each end rather than jumping back to the start.
+   Sharing a tile with a chick loses the level. */
+function coyotePos(s,atStart){
+  const c=s.coyote;
+  if(!c||!c.path||!c.path.length)return null;
+  return c.path[(atStart?0:(c.i||0))%c.path.length];
+}
+/* a box in the way, or a fence or closed gate between the two tiles, stops it */
+function coyoteBlocked(s,from,to){
+  if(s.content[I(s,to[0],to[1])]==="box")return true;
+  const dx=to[0]-from[0], dy=to[1]-from[1];
+  if(Math.abs(dx)<=1&&Math.abs(dy)<=1&&!crossing(s,from[0],from[1],to[0],to[1],false))return true;
+  return false;
+}
+function stepCoyote(s){
+  const c=s.coyote;
+  if(!c||!c.path||!c.path.length)return false;
+  const n=c.path.length;
+  if(n===1){c.i=0;return coyoteCaught(s);}
+  /* paces out and back, 1 2 3 4 3 2 1 ..., and turns early when blocked */
+  if(!c.d)c.d=1;
+  if(c.i==null)c.i=0;
+  const aim=d=>{
+    let ni=c.i+d;
+    if(ni>=n)return[n-2,-1];
+    if(ni<0)return[1,1];
+    return[ni,d];
+  };
+  const here=c.path[c.i];
+  let[ni,nd]=aim(c.d);
+  if(coyoteBlocked(s,here,c.path[ni])){
+    const[mi,md]=aim(-c.d);
+    if(!coyoteBlocked(s,here,c.path[mi])){c.i=mi;c.d=md;}
+    else c.d=-c.d;            /* penned in on both sides: turn on the spot */
+  }else{c.i=ni;c.d=nd;}
+  return coyoteCaught(s);
+}
+function coyoteCaught(s){
+  const p=coyotePos(s);
+  if(!p)return false;
+  return (p[0]===s.a.x&&p[1]===s.a.y)||(p[0]===s.b.x&&p[1]===s.b.y);
+}
+function pathIndex(s,x,y){
+  const c=s.coyote;
+  if(!c||!c.path)return -1;
+  for(let i=0;i<c.path.length;i++)if(c.path[i][0]===x&&c.path[i][1]===y)return i;
+  return -1;
+}
+/* ---------- eagle ----------
+   Never lands, so it is never on the board. The designer marks the tiles it
+   dives at; it works through them in order, striking one every 3 steps.
+   The cycle runs from level load, not from the first press. */
+function eagleTiles(s){return (s.eagle&&s.eagle.tiles)?s.eagle.tiles:[];}
+function eagleIndex(s,x,y){
+  const t=eagleTiles(s);
+  for(let i=0;i<t.length;i++)if(t[i][0]===x&&t[i][1]===y)return i;
+  return -1;
+}
+function initEagle(s){
+  s.eg=eagleTiles(s).length?{k:0,at:3}:null;
+}
+function chickOn(s,i){
+  if(i==null)return false;
+  const x=i%s.cols, y=Math.floor(i/s.cols);
+  return !!mateAt(s,x,y);
+}
+function eagleTarget(s){
+  const t=eagleTiles(s);
+  if(!s.eg||!t.length)return null;
+  return t[s.eg.k%t.length];
+}
+function stepEagle(s){
+  const t=eagleTiles(s);
+  if(!t.length){s.eg=null;return false;}
+  const now=s.steps||0;
+  let struck=false;
+  if(!s.eg)s.eg={k:0,at:now+3};
+  else if(now>=s.eg.at){
+    const p=t[s.eg.k%t.length];
+    struck=!!mateAt(s,p[0],p[1]);
+    s.eg={k:(s.eg.k+1)%t.length,at:now+3};   /* strike, then line up the next */
+  }
+  return struck;
+}
+function dangerTiles(s){
+  const set=new Set();
+  const et=eagleTarget(s);
+  if(et)set.add(I(s,et[0],et[1]));
+  if(!s.bearT)return set;
+  for(const i of bearTiles(s)){
+    if(s.bearT[i]==null)continue;
+    const bx=i%s.cols, by=Math.floor(i/s.cols);
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+      const x=bx+dx,y=by+dy;
+      if(inB(s,x,y))set.add(I(s,x,y));
+    }
+  }
+  return set;
+}
+function nearMate(s,x,y){
+  return (Math.abs(x-s.a.x)<=1&&Math.abs(y-s.a.y)<=1)||(Math.abs(x-s.b.x)<=1&&Math.abs(y-s.b.y)<=1);
+}
+function rabbitCornered(s){
+  if(!s.rabbit)return true;
+  for(const[dx,dy]of D4){
+    const x=s.rabbit.x+dx,y=s.rabbit.y+dy;
+    if(walkable(s,x,y)&&crossing(s,s.rabbit.x,s.rabbit.y,x,y,false)&&!nearMate(s,x,y))return false;
+  }
+  return true;
+}
+function coopCount(s){let n=0;for(const c of s.content)if(c==="coop")n++;return n;}
+function onCoop(s,m){return s.content[I(s,s[m].x,s[m].y)]==="coop";}
+function coopsFilled(s){return onCoop(s,"a")&&onCoop(s,"b");}
+function checkWin(s){
+  if(berriesTotal(s)>0)return;
+  if(coopCount(s)>0&&!coopsFilled(s))return;
+  if(!rabbitCornered(s))return;
+  const done=[];
+  if(coopCount(s)>0)done.push("both chicks home");
+  if(s.rabbit)done.push("rabbit cornered");
+  won=true;
+  msg={t:"win",s:"Solved in "+(s.steps||0)+" steps"+(done.length?" — "+done.join(", "):"")+"."};
+}
+
+/* ---------- render ---------- */
+const board=document.getElementById("board");
+function render(){
+  const s=(mode==="play")?game:level;
+  document.documentElement.style.setProperty("--cols",s.cols);
+  const avail=Math.min(window.innerWidth-70,660);
+  const cell=Math.max(18,Math.min(40,Math.floor((avail-s.cols*2)/s.cols)));
+  document.documentElement.style.setProperty("--cell",cell+"px");
+
+  const danger=(mode==="play")?dangerTiles(s):new Set();
+  const coy=coyotePos(s,mode==="edit");
+  board.innerHTML="";
+  for(let y=0;y<s.rows;y++)for(let x=0;x<s.cols;x++){
+    const d=document.createElement("button");
+    d.className="cell"+(((x+y)%2)?" alt":"");
+    if(s.terrain[I(s,x,y)]==="water")d.className+=" water";
+    if(s.content[I(s,x,y)]==="coop")d.className+=" coop";
+    if(danger.has(I(s,x,y)))d.className+=" danger";
+    const pi=(mode==="edit")?pathIndex(s,x,y):-1;
+    if(pi>=0)d.className+=" path";
+    const ei=(mode==="edit")?eagleIndex(s,x,y):-1;
+    if(ei>=0)d.className+=" etile";
+    const m=mateAt(s,x,y);
+    let g="";
+    if(m){g="🐤";d.className+=(s.anchor===m)?" chk pinned":" chk";
+      d.style.setProperty("--c",m==="a"?"var(--chickL)":"var(--chickR)");}
+    else if(coy&&coy[0]===x&&coy[1]===y)g="🐺";
+    else if(s.rabbit&&s.rabbit.x===x&&s.rabbit.y===y)g="🐰";
+    else{const c=s.content[I(s,x,y)];if(c)g=GLYPH[c];else if(ei>=0)g="🦅";}
+    d.textContent=g;
+    if(m){const t=document.createElement("span");t.className="tag";t.textContent=(m==="a")?"L":"R";d.appendChild(t);
+      if(mode==="play"){
+        const o=s[m==="a"?"b":"a"];
+        const j=nextSlot(slotOf(x-o.x,y-o.y),(s.dir||{a:true,b:false})[m]);
+        const ax=Math.sign(o.x+CW8[j][0]-x), ay=Math.sign(o.y+CW8[j][1]-y);
+        const p=document.createElement("span");p.className="arw";
+        p.textContent=ARROW[(ay+1)*3+(ax+1)];
+        p.style.left=(50+ax*40)+"%"; p.style.top=(50+ay*40)+"%";
+        d.appendChild(p);
+      }}
+    if(pi>=0){const n=document.createElement("span");n.className="pnum";n.textContent=pi+1;d.appendChild(n);}
+    if(ei>=0&&eagleTiles(s).length>1){const n=document.createElement("span");n.className="enum";n.textContent=ei+1;d.appendChild(n);}
+    if(s.content[I(s,x,y)]==="bear"&&s.bearT&&s.bearT[I(s,x,y)]!=null){
+      const n=document.createElement("span");n.className="count";n.textContent=s.bearT[I(s,x,y)];d.appendChild(n);
+    }
+    const et=(mode==="play")?eagleTarget(s):null;
+    if(et&&et[0]===x&&et[1]===y){
+      const n=document.createElement("span");n.className="count";
+      n.textContent="🦅"+Math.max(0,s.eg.at-(s.steps||0));d.appendChild(n);
+    }
+    d.setAttribute("aria-label",`${x},${y}`);
+    d.onclick=()=>{if(mode==="edit")paint(x,y);};
+
+    /* fences and gates sit on this tile's north and west edges */
+    for(const side of ["n","w"]){
+      if(side==="n"&&y===0)continue;
+      if(side==="w"&&x===0)continue;
+      const v=getEdge(s,x,y,side);
+      if(v){
+        const e=document.createElement("span");e.className="ed "+side+(isGate(v)?" gate":"");
+        if(isGate(v)){
+          const v0=edgeVertices(x,y,side)[0];
+          const hp=document.createElement("span");
+          hp.className="hinge "+((v.h[0]===v0[0]&&v.h[1]===v0[1])?"s":"e");
+          e.appendChild(hp);
+        }
+        d.appendChild(e);
+      }
+      if(mode==="edit"&&(tool==="fence"||tool==="gate")){
+        const h=document.createElement("span");h.className="hot "+side;
+        h.onclick=ev=>{ev.stopPropagation();
+          if(tool==="fence")setEdge(level,x,y,side,(getEdge(level,x,y,side)==="fence")?null:"fence");
+          else cycleGate(level,x,y,side);
+          render();};
+        d.appendChild(h);
+      }
+    }
+    board.appendChild(d);
+  }
+  document.getElementById("sSteps").textContent=(s.steps||0);
+  const tot=berriesTotal(level), left=berriesTotal(s);
+  document.getElementById("sBerries").textContent=(tot-left)+"/"+tot;
+  document.getElementById("sAnchor").textContent=(s.anchor==="a")?"L":"R";
+  const nc=coopCount(s);
+  document.getElementById("sCoops").textContent=nc?((onCoop(s,"a")?1:0)+(onCoop(s,"b")?1:0))+"/2":"—";
+  document.getElementById("sRabbit").textContent=!s.rabbit?"none":(rabbitCornered(s)?"cornered":"free");
+  const b=document.getElementById("banner");
+  b.innerHTML=msg?`<div class="banner ${msg.t}">${msg.s}</div>`:"";
+  document.getElementById("hint").textContent=(mode==="play")
+    ? "Each chick orbits the anchored one (⌖) in its own direction. A push costs a step and no ground; a hard block turns it around for good."
+    : "Tap tiles to paint. The pair must stay one tile apart when you return to Play.";
+  document.getElementById("jumpbar").hidden=(mode!=="play");
+  document.getElementById("jL").classList.toggle("live",s.anchor==="b");
+  document.getElementById("jR").classList.toggle("live",s.anchor==="a");
+  const d=s.dir||{a:true,b:false};
+  document.querySelector("#jL small").textContent=d.a?"↻ CLOCKWISE":"↺ COUNTER-CW";
+  document.querySelector("#jR small").textContent=d.b?"↻ CLOCKWISE":"↺ COUNTER-CW";
+}
+
+/* ---------- editor ---------- */
+const TOOLS=[["ground","Grass","var(--grass)"],["water","Water","var(--water)"],
+  ["tree","Tree","transparent"],["box","Box","transparent"],["berry","Berry","transparent"],
+  ["coop","Coop","transparent"],["bear","Bear","transparent"],["coyote","Coyote path","transparent"],["eagle","Eagle target","transparent"],["fence","Fence","var(--fence)"],["gate","Gate","var(--gate)"],
+  ["rabbit","Rabbit","transparent"],["a","Left chick","transparent"],["b","Right chick","transparent"]];
+const editRow=document.getElementById("editRow");
+TOOLS.forEach(([k,label,col])=>{
+  const b=document.createElement("button");
+  b.className="btn tool"; b.dataset.tool=k; b.setAttribute("aria-pressed",k===tool);
+  const face={rabbit:"🐰",a:"🐤",b:"🐤",coyote:"🐺",eagle:"🦅"}[k];
+  b.innerHTML=(GLYPH[k]||face||`<span class="swatch" style="background:${col}"></span>`)+" "+label;
+  b.onclick=()=>{tool=k;[...editRow.children].forEach(c=>c.setAttribute("aria-pressed",c.dataset.tool===k));render();};
+  editRow.appendChild(b);
+});
+
+function paint(x,y){
+  const s=level,i=I(s,x,y);
+  if(tool==="fence"||tool==="gate")return;   /* those go on the edges, not the tiles */
+  if(tool==="eagle"){
+    if(!s.eagle||!s.eagle.tiles)s.eagle={tiles:[]};
+    const k=eagleIndex(s,x,y);
+    if(k>=0)s.eagle.tiles.splice(k,1); else s.eagle.tiles.push([x,y]);
+    render(); return;
+  }
+  if(tool==="coyote"){
+    if(!s.coyote)s.coyote={path:[],i:0};
+    const p=s.coyote.path, last=p[p.length-1];
+    if(last&&last[0]===x&&last[1]===y)p.pop();        /* tap the tail to undo it */
+    else if(pathIndex(s,x,y)<0)p.push([x,y]);         /* otherwise extend the loop */
+    if(!p.length)s.coyote=null;
+    s.terrain[i]="ground";
+    render(); return;
+  }
+  if(tool==="a"||tool==="b"){ s[tool]={x,y}; if(s.a.x===s.b.x&&s.a.y===s.b.y){s.b={x:(x+1)%s.cols,y};} s.terrain[i]="ground"; }
+  else if(tool==="rabbit"){ s.rabbit=(s.rabbit&&s.rabbit.x===x&&s.rabbit.y===y)?null:{x,y}; s.terrain[i]="ground"; }
+  else if(tool==="ground"){ s.terrain[i]="ground"; s.content[i]=null; }
+  else if(tool==="water"){ s.terrain[i]="water"; s.content[i]=null; }
+  else { s.content[i]=(s.content[i]===tool)?null:tool; s.terrain[i]="ground"; }
+  render();
+}
+
+function setMode(m){
+  mode=m; msg=null; won=false;
+  document.getElementById("mPlay").setAttribute("aria-pressed",m==="play");
+  document.getElementById("mEdit").setAttribute("aria-pressed",m==="edit");
+  document.getElementById("playRow").hidden=(m!=="play");
+  editRow.hidden=(m!=="edit");
+  if(m==="play"){ game=JSON.parse(JSON.stringify(level)); game.steps=0; initEagle(game); undoStack=[]; }
+  render();
+}
+document.getElementById("jL").onclick=()=>jump("a");
+document.getElementById("jR").onclick=()=>jump("b");
+document.getElementById("mPlay").onclick=()=>setMode("play");
+document.getElementById("mEdit").onclick=()=>setMode("edit");
+document.getElementById("bUndo").onclick=()=>{
+  const p=undoStack.pop(); if(!p)return;
+  const o=JSON.parse(p); game=o.g; msg=o.m; won=false; render();
+};
+document.getElementById("bReset").onclick=()=>{game=JSON.parse(JSON.stringify(level));game.steps=0;initEagle(game);undoStack=[];msg=null;won=false;render();};
+document.getElementById("bDirs").onclick=e=>{eightWay=!eightWay;e.target.textContent="Moves: "+(eightWay?"8-way":"4-way");render();};
+document.getElementById("bTurn").onclick=e=>{sharedTurn=!sharedTurn;
+  e.target.textContent="Bump turns: "+(sharedTurn?"both chicks":"bumped chick only");render();};
+document.getElementById("bResize").onclick=()=>{
+  const c=+document.getElementById("iCols").value,r=+document.getElementById("iRows").value;
+  level=blank(Math.min(16,Math.max(3,c)),Math.min(16,Math.max(3,r)));
+  syncFields(); setMode("edit");
+};
+document.getElementById("bClear").onclick=()=>{
+  const n=level.name,t=level.notes;
+  level=blank(level.cols,level.rows); level.name=n; level.notes=t; setMode("edit");
+};
+document.getElementById("iName").oninput=e=>level.name=e.target.value;
+document.getElementById("iNotes").oninput=e=>level.notes=e.target.value;
+function syncFields(){
+  document.getElementById("iCols").value=level.cols;
+  document.getElementById("iRows").value=level.rows;
+  document.getElementById("iName").value=level.name||"";
+  document.getElementById("iNotes").value=level.notes||"";
+}
+
+/* ---------- json + saves ---------- */
+document.getElementById("bExport").onclick=()=>{document.getElementById("iJson").value=JSON.stringify(level);};
+function fixLevel(o){
+  ensureEdges(o);
+  if(!o.eagle||!o.eagle.tiles)o.eagle={tiles:[]};
+  return o;
+}
+document.getElementById("bImport").onclick=()=>{
+  try{const o=JSON.parse(document.getElementById("iJson").value);
+    if(Array.isArray(o)){                       /* a whole campaign at once */
+      if(!o.length||!o[0].cols)throw 0;
+      const a=loadSaves();
+      for(const one of o)a.push(fixLevel(one));
+      putSaves(a); renderSaves();
+      level=fixLevel(o[0]); syncFields(); setMode("edit");
+      msg={t:"win",s:"Added "+o.length+" levels to the saved list."}; render(); return;
+    }
+    if(!o.cols||!o.terrain)throw 0;
+    level=fixLevel(o); syncFields(); setMode("edit");
+  }catch(e){msg={t:"bad",s:"That JSON did not parse as a level."};render();}
+};
+document.getElementById("bCopy").onclick=async e=>{
+  const v=JSON.stringify(level);document.getElementById("iJson").value=v;
+  try{await navigator.clipboard.writeText(v);e.target.textContent="Copied";setTimeout(()=>e.target.textContent="Copy",1200);}
+  catch(_){document.getElementById("iJson").select();}
+};
+function loadSaves(){try{return JSON.parse(localStorage.getItem("cm_situations")||"[]")}catch(_){return[]}}
+function putSaves(a){try{localStorage.setItem("cm_situations",JSON.stringify(a))}catch(_){}}
+function renderSaves(){
+  const ul=document.getElementById("savesList"),a=loadSaves();ul.innerHTML="";
+  a.forEach((s,i)=>{
+    const li=document.createElement("li");
+    const t=document.createElement("span");t.textContent=s.name||("Untitled "+(i+1));
+    const wrap=document.createElement("span");
+    const load=document.createElement("button");load.textContent="Load";
+    load.onclick=()=>{level=JSON.parse(JSON.stringify(s));syncFields();setMode("edit");};
+    const del=document.createElement("button");del.textContent="Delete";
+    del.onclick=()=>{const b=loadSaves();b.splice(i,1);putSaves(b);renderSaves();};
+    wrap.append(load,del);li.append(t,wrap);ul.appendChild(li);
+  });
+}
+document.getElementById("bSave").onclick=()=>{
+  const a=loadSaves();a.push(JSON.parse(JSON.stringify(level)));putSaves(a);renderSaves();
+};
+
+/* ---------- sample situation ---------- */
+(function seed(){
+  const s=blank(9,8);
+  s.name="Irreversible box positioning";
+  s.notes="A box sits beside the only gap north. Push it the wrong way and the path to the berry closes for good.";
+  const T=(x,y,v)=>s.content[I(s,x,y)]=v;
+  const W=(x,y)=>s.terrain[I(s,x,y)]="water";
+  for(let x=0;x<9;x++){W(x,0);W(x,7);}
+  for(let y=0;y<8;y++){W(0,y);W(8,y);}
+  T(4,2,"tree");T(5,2,"tree");T(5,3,"tree");T(2,5,"tree");T(6,5,"tree");
+  T(4,4,"box");T(3,3,"box");
+  T(6,2,"berry");
+  s.a={x:2,y:4};s.b={x:3,y:4};s.anchor="a";s.rabbit={x:6,y:3};
+  level=s;
+})();
+syncFields(); renderSaves(); setMode("play");
+window.addEventListener("resize",render);
+</script>
