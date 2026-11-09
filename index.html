@@ -141,6 +141,12 @@ kbd{font:600 .62rem var(--font-m);border:1px solid var(--line);border-bottom-wid
 button.btn{font:600 .8rem var(--font-b);padding:8px 13px;border-radius:8px;border:1px solid var(--line);
   background:var(--panel);color:var(--ink);cursor:pointer}
 button.btn:hover{border-color:var(--muted)}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;border-bottom:1px solid var(--line);
+  padding-bottom:8px}
+.tabs button{font:600 .78rem var(--font-b);padding:6px 11px;border-radius:999px;cursor:pointer;
+  border:1px solid transparent;background:transparent;color:var(--muted)}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
 .tool{display:flex;align-items:center;gap:6px}
 .tool[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .swatch{width:14px;height:14px;border-radius:3px;border:1px solid var(--line)}
@@ -194,7 +200,10 @@ ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;co
   <button class="btn" id="bTurn">Bump turns: both chicks</button>
 </div>
 
-<div class="row" id="editRow" hidden></div>
+<div id="editPanel" hidden>
+  <div class="tabs" id="toolTabs"></div>
+  <div class="row" id="editRow"></div>
+</div>
 
 <details id="dSize">
   <summary>Board &amp; situation</summary>
@@ -719,19 +728,44 @@ function render(){
 }
 
 /* ---------- editor ---------- */
-const TOOLS=[["ground","Grass","var(--grass)"],["water","Water","var(--water)"],
-  ["tree","Tree","transparent"],["box","Box","transparent"],["berry","Berry","transparent"],
-  ["coop","Coop","transparent"],["bear","Bear","transparent"],["coyote","Coyote path","transparent"],["eagle","Eagle target","transparent"],["fence","Fence","var(--fence)"],["gate","Gate","var(--gate)"],
-  ["rabbit","Rabbit","transparent"],["a","Left chick","transparent"],["b","Right chick","transparent"]];
+const FACE={rabbit:"\ud83d\udc30",a:"\ud83d\udc24",b:"\ud83d\udc24",coyote:"\ud83d\udc3a",eagle:"\ud83e\udd85"};
+const CATS=[
+  ["Ground",[["ground","Grass","var(--grass)"],["water","Water","var(--water)"]]],
+  ["Blockers",[["tree","Tree"],["box","Box"],["fence","Fence","var(--fence)"],["gate","Gate","var(--gate)"]]],
+  ["Goals",[["coop","Coop"],["berry","Berry"]]],
+  ["Enemies",[["bear","Bear"],["coyote","Coyote path"],["eagle","Eagle target"],["rabbit","Rabbit"]]],
+  ["Chicks",[["a","Left chick"],["b","Right chick"]]]
+];
+let cat=0;
 const editRow=document.getElementById("editRow");
-TOOLS.forEach(([k,label,col])=>{
+const tabRow=document.getElementById("toolTabs");
+
+function drawTools(){
+  editRow.innerHTML="";
+  CATS[cat][1].forEach(([k,label,col])=>{
+    const b=document.createElement("button");
+    b.className="btn tool"; b.dataset.tool=k; b.setAttribute("aria-pressed",k===tool);
+    b.innerHTML=(GLYPH[k]||FACE[k]||`<span class="swatch" style="background:${col||"transparent"}"></span>`)+" "+label;
+    b.onclick=()=>{
+      tool=k;
+      [...editRow.children].forEach(c=>c.setAttribute("aria-pressed",c.dataset.tool===k));
+      render();
+    };
+    editRow.appendChild(b);
+  });
+}
+CATS.forEach(([name],i)=>{
   const b=document.createElement("button");
-  b.className="btn tool"; b.dataset.tool=k; b.setAttribute("aria-pressed",k===tool);
-  const face={rabbit:"🐰",a:"🐤",b:"🐤",coyote:"🐺",eagle:"🦅"}[k];
-  b.innerHTML=(GLYPH[k]||face||`<span class="swatch" style="background:${col}"></span>`)+" "+label;
-  b.onclick=()=>{tool=k;[...editRow.children].forEach(c=>c.setAttribute("aria-pressed",c.dataset.tool===k));render();};
-  editRow.appendChild(b);
+  b.textContent=name; b.setAttribute("aria-selected",i===cat);
+  b.onclick=()=>{
+    cat=i; tool=CATS[i][1][0][0];
+    [...tabRow.children].forEach((c,j)=>c.setAttribute("aria-selected",j===i));
+    drawTools(); render();
+  };
+  tabRow.appendChild(b);
 });
+tool=CATS[0][1][0][0];
+drawTools();
 
 function paint(x,y){
   const s=level,i=I(s,x,y);
@@ -764,7 +798,7 @@ function setMode(m){
   document.getElementById("mPlay").setAttribute("aria-pressed",m==="play");
   document.getElementById("mEdit").setAttribute("aria-pressed",m==="edit");
   document.getElementById("playRow").hidden=(m!=="play");
-  editRow.hidden=(m!=="edit");
+  document.getElementById("editPanel").hidden=(m!=="edit");
   if(m==="play"){ game=JSON.parse(JSON.stringify(level)); game.steps=0; initEagle(game); undoStack=[]; }
   render();
 }
