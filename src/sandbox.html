@@ -1344,6 +1344,7 @@ function drawTools(){
     editRow.appendChild(b);
   });
 }
+tabRow.innerHTML="";   /* so a re-run cannot stack a second row of tabs */
 CATS.forEach(([name],i)=>{
   const b=document.createElement("button");
   b.textContent=name; b.setAttribute("aria-selected",i===cat);
