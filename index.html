@@ -29,10 +29,26 @@
 .side h2{font:800 .78rem var(--font-b);text-transform:uppercase;letter-spacing:.07em;
   color:var(--muted);margin:0 0 7px}
 .side h2+ul{margin-bottom:16px}
+/* phone: the list is a drawer behind the Levels button */
+.side{position:fixed;top:0;bottom:0;left:0;z-index:50;width:min(78vw,290px);overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);
+  padding:14px max(14px,env(safe-area-inset-left,0px)) 24px 14px;
+  padding-top:calc(14px + env(safe-area-inset-top,0px));
+  transform:translateX(-102%)}
+.side.open{transform:none}
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.4)}
+#levelsBtn{font:600 .8rem var(--font-b);padding:7px 12px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.sideclose{float:right;border:0;background:transparent;color:var(--muted);cursor:pointer;
+  font:600 1rem var(--font-m);padding:0 4px;margin:-4px -2px 0 0}
+@media (prefers-reduced-motion:no-preference){.side{transition:transform .2s ease}}
 @media(min-width:880px){
   .layout{grid-template-columns:236px minmax(0,1fr)}
-  .side{grid-column:1;grid-row:1;position:sticky;top:8px;max-height:calc(100vh - 36px);overflow:auto}
+  .side{grid-column:1;grid-row:1;position:sticky;top:8px;left:auto;bottom:auto;
+    width:auto;max-height:calc(100vh - 36px);transform:none;background:transparent;
+    border:0;padding:0;z-index:auto}
   main{grid-column:2;grid-row:1;min-width:0}
+  #levelsBtn,.scrim,.sideclose{display:none}
 }
 .side .num{font:600 .68rem var(--font-m);color:var(--muted);margin-right:6px}
 .side li.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
@@ -44,6 +60,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);
   padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-block:14px 40px;max-width:1040px;margin:0 auto}
 h1{font-family:var(--font-d);font-size:1.3rem;font-weight:800;margin:0;letter-spacing:-.01em}
+@media(max-width:540px){h1{font-size:1.05rem}}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
 .seg button{border:0;background:transparent;color:var(--muted);font:600 .8rem var(--font-b);padding:7px 14px;cursor:pointer}
@@ -140,6 +157,7 @@ ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;co
 </style>
 
 <div class="topbar">
+  <button id="levelsBtn" aria-expanded="false">☰ Levels</button>
   <h1>Chick Mates Sandbox</h1>
   <div class="seg">
     <button id="mPlay" aria-pressed="true">Play</button>
@@ -202,7 +220,8 @@ ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;co
 </details>
 </main>
 
-<aside class="side">
+<aside class="side" id="side">
+  <button class="sideclose" id="sideClose" aria-label="Close">✕</button>
   <h2>Campaign</h2>
   <ul class="saves" id="campList"></ul>
   <h2>My situations</h2>
@@ -839,8 +858,24 @@ function entry(obj,label,onLoad,onDelete){
 }
 function openLevel(obj){
   level=fixLevel(JSON.parse(JSON.stringify(obj)));
-  syncFields(); setMode("play"); renderSaves();
+  syncFields(); setMode("play"); renderSaves(); drawer(false);
 }
+/* the drawer is only a drawer on a phone; on a wide screen the panel is always there */
+function drawer(open){
+  const el=document.getElementById("side");
+  el.classList.toggle("open",open);
+  document.getElementById("levelsBtn").setAttribute("aria-expanded",open?"true":"false");
+  let sc=document.getElementById("scrim");
+  if(open&&!sc){
+    sc=document.createElement("div");sc.id="scrim";sc.className="scrim";
+    sc.onclick=()=>drawer(false);
+    document.body.appendChild(sc);
+  }else if(!open&&sc)sc.remove();
+}
+document.getElementById("levelsBtn").onclick=()=>
+  drawer(!document.getElementById("side").classList.contains("open"));
+document.getElementById("sideClose").onclick=()=>drawer(false);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")drawer(false);});
 function renderSaves(){
   const camp=document.getElementById("campList");
   camp.innerHTML="";
