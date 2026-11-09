@@ -8,26 +8,28 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=Public+Sans:wght@400;600&display=swap">
 <style>
 /* Layout: single column — board first, controls stacked beneath, panels collapse */
-:root{
   --bg:#f2f4f1; --panel:#ffffff; --ink:#1d2420; --muted:#66736c;
   --line:#d9dfda; --grass:#cfe0c3; --grass2:#c4d8b6; --water:#7fa8c9;
   --accent:#e2a32b; --danger:#c4553d; --good:#4f8f58;
-  --chickL:#2f6f9e; --chickR:#a8456f; --fence:#7d5732; --gate:#2f7f6a;
+  --chickL:#2f6f9e; --chickR:#a8456f; --fence:#7d5732; --gate:#2f7f6a; --bar:#6a7f6b;
   --font-d:"Bricolage Grotesque",Georgia,serif;
   --font-b:"Public Sans",system-ui,sans-serif;
   --font-m:"IBM Plex Mono",ui-monospace,monospace;
   --cell:32px; --cols:12;
+  --bar:#e5e9e3; --barfg:#1d2420;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#171b19; --panel:#1f2522; --ink:#e8ede9; --muted:#95a39b;
   --line:#2e3733; --grass:#39483a; --grass2:#33412f; --water:#2d4f6b;
   --accent:#e8b24a; --danger:#d9674c; --good:#6bb073;
-  --chickL:#5ca5d8; --chickR:#e07aa6; --fence:#c3915a; --gate:#5cc0a4; color-scheme:dark;}}
+  --chickL:#5ca5d8; --chickR:#e07aa6; --fence:#c3915a; --gate:#5cc0a4;
+  --bar:#2e3733; --barfg:#e8ede9; color-scheme:dark;}}
 :root[data-theme="dark"]{
   --bg:#171b19; --panel:#1f2522; --ink:#e8ede9; --muted:#95a39b;
   --line:#2e3733; --grass:#39483a; --grass2:#33412f; --water:#2d4f6b;
   --accent:#e8b24a; --danger:#d9674c; --good:#6bb073;
-  --chickL:#5ca5d8; --chickR:#e07aa6; --fence:#c3915a; --gate:#5cc0a4; color-scheme:dark;}
+  --chickL:#5ca5d8; --chickR:#e07aa6; --fence:#c3915a; --gate:#5cc0a4;
+  --bar:#2e3733; --barfg:#e8ede9; color-scheme:dark;}
 
 *{box-sizing:border-box}
 .layout{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
@@ -137,6 +139,28 @@ kbd{font:600 .62rem var(--font-m);border:1px solid var(--line);border-bottom-wid
 .banner.win{background:color-mix(in srgb,var(--good) 32%,var(--panel));color:var(--good)}
 .banner.bad{background:color-mix(in srgb,var(--danger) 26%,var(--panel));color:var(--danger)}
 
+#analysis{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:14px;margin-bottom:12px}
+.ahead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.ascore{font:800 2rem var(--font-d);line-height:1;font-variant-numeric:tabular-nums}
+.ascore small{font:600 .85rem var(--font-m);color:var(--muted)}
+.aband{font:700 .8rem var(--font-b);text-transform:uppercase;letter-spacing:.06em;
+  padding:4px 10px;border-radius:999px;background:var(--bar);color:var(--bg)}
+.abars{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.abar{display:grid;grid-template-columns:1fr 46px;gap:8px;align-items:center}
+.abar span{font:600 .74rem var(--font-b);color:var(--muted)}
+.abar i{font:600 .74rem var(--font-m);color:var(--ink);font-style:normal;text-align:right;
+  font-variant-numeric:tabular-nums}
+.atrack{grid-column:1/3;height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.atrack b{display:block;height:100%;background:var(--bar);border-radius:3px}
+.agrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:9px;
+  padding-top:12px;border-top:1px solid var(--line)}
+.agrid div{min-width:0}
+.agrid dt{font:600 .68rem var(--font-b);color:var(--muted);text-transform:uppercase;
+  letter-spacing:.04em;margin-bottom:2px}
+.agrid dd{margin:0;font:600 .92rem var(--font-m);font-variant-numeric:tabular-nums}
+.anote{font:.73rem/1.5 var(--font-b);color:var(--muted);margin:11px 0 0}
+.aseq{font:.7rem/1.4 var(--font-m);color:var(--muted);word-break:break-all}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 button.btn{font:600 .8rem var(--font-b);padding:8px 13px;border-radius:8px;border:1px solid var(--line);
   background:var(--panel);color:var(--ink);cursor:pointer}
@@ -164,6 +188,27 @@ ul.saves li{display:flex;gap:8px;align-items:center;justify-content:space-betwee
   border:1px solid var(--line);border-radius:7px;padding:6px 9px}
 ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;color:var(--accent);cursor:pointer;padding:2px 4px}
 .hint{font:.76rem/1.5 var(--font-b);color:var(--muted);margin:0 0 10px}
+.score{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:4px 0 12px}
+.score b{font:800 2.1rem/1 var(--font-d);font-variant-numeric:tabular-nums}
+.score .of{font:600 .8rem var(--font-m);color:var(--muted)}
+.pill{font:700 .7rem var(--font-b);text-transform:uppercase;letter-spacing:.06em;
+  padding:3px 9px;border-radius:999px;background:var(--bar);color:var(--barfg)}
+.bars{display:flex;flex-direction:column;gap:7px;margin:0 0 14px}
+.bar{display:grid;grid-template-columns:118px 1fr 42px;gap:8px;align-items:center;
+  font:600 .74rem var(--font-b)}
+.bar .track{height:7px;border-radius:999px;background:color-mix(in srgb,var(--ink) 12%,transparent);
+  overflow:hidden}
+.bar .fill{height:100%;border-radius:999px;background:var(--accent)}
+.bar .w{font:600 .68rem var(--font-m);color:var(--muted);text-align:right}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-bottom:12px}
+.fact{border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+.fact span{display:block;font:600 .64rem var(--font-b);color:var(--muted);
+  text-transform:uppercase;letter-spacing:.05em}
+.fact b{font:700 1.05rem var(--font-m);font-variant-numeric:tabular-nums}
+.note{font:.76rem/1.55 var(--font-b);color:var(--muted);margin:10px 0 0}
+.note code{font:.72rem var(--font-m);background:color-mix(in srgb,var(--ink) 8%,transparent);
+  padding:1px 4px;border-radius:4px}
+.warn{color:var(--danger)}
 @media (prefers-reduced-motion:no-preference){.cell{transition:box-shadow .12s}}
 </style>
 </head>
@@ -194,9 +239,13 @@ ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;co
   <span>Rabbit <b id="sRabbit">free</b></span>
 </div>
 
+<div id="analysis" hidden></div>
+
 <div class="row" id="playRow">
   <button class="btn" id="bUndo">Undo</button>
   <button class="btn" id="bReset">Reset</button>
+  <button class="btn" id="bAnalyse">Analyse difficulty</button>
+  <button class="btn" id="bAnalyze">Analyze difficulty</button>
   <button class="btn" id="bTurn">Bump turns: both chicks</button>
 </div>
 
@@ -220,6 +269,11 @@ ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;co
     <button class="btn" id="bSave">Save board</button>
     <button class="btn" id="bClear">Clear board</button>
   </div>
+</details>
+
+<details id="dDiff" hidden>
+  <summary>Difficulty report</summary>
+  <div id="diffBody"></div>
 </details>
 
 <details id="dJson">
@@ -386,23 +440,20 @@ function dirOf(s,who){
   return s.dir[who];
 }
 
-function jump(who){
-  if(won||mode!=="play")return;
-  const s=game;
+/* The move, as a pure function on a state. Play mode and the analyzer both
+   call this, so the rules can never drift apart between them.
+   Returns {event, note} — event is "ok" | "dead". */
+function applyJump(s,who){
   const cw=dirOf(s,who);
   const mv=s[who], an=s[who==="a"?"b":"a"];
   const cur=slotOf(mv.x-an.x,mv.y-an.y);
   const fwd=nextSlot(cur,cw);
   const [fx,fy]=slotTile(s,who,fwd);
-
-  undoStack.push(JSON.stringify({g:s,m:msg}));
   s.anchor=(who==="a")?"b":"a";
 
   /* water ahead is a real landing — and a fatal one, unless a fence is in the way */
-  if(inB(s,fx,fy)&&s.terrain[I(s,fx,fy)]==="water"&&crossing(s,mv.x,mv.y,fx,fy,false)){
-    msg={t:"bad",s:"A chick landed in the water — level restarted."};
-    game=JSON.parse(JSON.stringify(level)); game.steps=0; initEagle(game); undoStack=[]; render(); return;
-  }
+  if(inB(s,fx,fy)&&s.terrain[I(s,fx,fy)]==="water"&&crossing(s,mv.x,mv.y,fx,fy,false))
+    return {event:"dead",note:"A chick landed in the water — level restarted."};
 
   const fi=inB(s,fx,fy)?I(s,fx,fy):-1;
   const blockedByEdge=(fi<0)||!crossing(s,mv.x,mv.y,fx,fy,false);
@@ -425,34 +476,43 @@ function jump(who){
     }
   }
 
-  if(swung){
-    /* nudged the gate open, held its own tile and its direction */
-    msg={t:"bad",s:"Gate swung open — the chick stayed put."};
-  }else if(pushed){
-    /* shoved the box, held its own tile */
-    msg={t:"bad",s:sank?"Box went into the water and was lost.":"Box pushed — the chick stayed put."};
-  }else if(!blockedByEdge&&landable(s,fx,fy)){
+  let note=null, kind="move";
+  if(swung){ kind="swing"; note="Gate swung open — the chick stayed put."; }
+  else if(pushed){ kind="push"; note=sank?"Box went into the water and was lost.":"Box pushed — the chick stayed put."; }
+  else if(!blockedByEdge&&landable(s,fx,fy)){
     if(s.content[fi]==="berry")s.content[fi]=null;
-    mv.x=fx; mv.y=fy; msg=null;
+    mv.x=fx; mv.y=fy;
   }else{
-    /* hard block: turn around and go the other way from now on */
+    kind="turn";
     if(sharedTurn){ s.dir.a=!s.dir.a; s.dir.b=!s.dir.b; }
     else { s.dir[who]=!cw; }
-    msg={t:"bad",s:sharedTurn
+    note=sharedTurn
       ?"Blocked — both chicks turned around."
-      :"Blocked — the chick turned around. Next press goes the other way."};
+      :"Blocked — the chick turned around. Next press goes the other way.";
   }
 
   s.steps=(s.steps||0)+1;
   moveRabbit(s);
   const bear=stepBears(s), coy=stepCoyote(s)||coyoteCaught(s), air=stepEagle(s);
-  if(bear||coy||air){
-    msg={t:"bad",s:bear?"The bear struck — level restarted."
+  if(bear||coy||air)return {event:"dead",kind,
+    note:bear?"The bear struck — level restarted."
       :coy?"The coyote caught a chick — level restarted."
       :"The eagle struck — level restarted."};
-    game=JSON.parse(JSON.stringify(level)); game.steps=0; initEagle(game); undoStack=[]; render(); return;
+  return {event:"ok",kind,note};
+}
+
+/* play mode: run the move on the live game and react to the outcome */
+function jump(who){
+  if(won||mode!=="play")return;
+  undoStack.push(JSON.stringify({g:game,m:msg}));
+  const r=applyJump(game,who);
+  if(r.event==="dead"){
+    msg={t:"bad",s:r.note};
+    game=JSON.parse(JSON.stringify(level)); game.steps=0; initEagle(game); undoStack=[];
+    render(); return;
   }
-  checkWin(s);
+  msg=r.note?{t:"bad",s:r.note}:null;
+  checkWin(game);
   render();
 }
 
@@ -617,16 +677,531 @@ function rabbitCornered(s){
 function coopCount(s){let n=0;for(const c of s.content)if(c==="coop")n++;return n;}
 function onCoop(s,m){return s.content[I(s,s[m].x,s[m].y)]==="coop";}
 function coopsFilled(s){return onCoop(s,"a")&&onCoop(s,"b");}
+/* pure win test, used by both play mode and the analyzer */
+function solved(s){
+  if(berriesTotal(s)>0)return false;
+  if(coopCount(s)>0&&!coopsFilled(s))return false;
+  if(!rabbitCornered(s))return false;
+  return true;
+}
 function checkWin(s){
-  if(berriesTotal(s)>0)return;
-  if(coopCount(s)>0&&!coopsFilled(s))return;
-  if(!rabbitCornered(s))return;
+  if(!solved(s))return;
   const done=[];
   if(coopCount(s)>0)done.push("both chicks home");
   if(s.rabbit)done.push("rabbit cornered");
   won=true;
   msg={t:"win",s:"Solved in "+(s.steps||0)+" steps"+(done.length?" — "+done.join(", "):"")+"."};
 }
+
+
+/* ---------- difficulty analysis ----------
+   Phase 1 of the evaluation proposal: a breadth-first search over the two
+   buttons, the structural metrics that fall out of it, and a weighted score.
+
+   The score is computed out of 100 for resolution and shown out of 10,
+   because a 0-100 figure invites false precision it cannot support. */
+
+function cloneState(s){return JSON.parse(JSON.stringify(s));}
+
+/* Everything that distinguishes one position from another. Two states with the
+   same key are the same puzzle position, so the search visits them once. */
+function stateKey(s){
+  const p=[s.a.x,s.a.y,s.b.x,s.b.y,s.dir.a?1:0,s.dir.b?1:0];
+  const boxes=[];
+  for(let i=0;i<s.content.length;i++)if(s.content[i]==="box")boxes.push(i);
+  p.push("B"+boxes.join(","));
+  const berries=[];
+  for(let i=0;i<s.content.length;i++)if(s.content[i]==="berry")berries.push(i);
+  if(berries.length)p.push("Y"+berries.join(","));
+  const gates=[];
+  for(const arr of ["h","v"])for(let i=0;i<s[arr].length;i++){
+    const g=s[arr][i];
+    if(g&&g.g)gates.push(arr+i+":"+g.h[0]+"."+g.h[1]);
+  }
+  p.push("G"+gates.join(","));
+  if(s.bearT){
+    const t=Object.keys(s.bearT).sort().map(k=>k+"="+(s.bearT[k]==null?"-":s.bearT[k]));
+    p.push("R"+t.join(","));
+  }
+  if(s.coyote&&s.coyote.path&&s.coyote.path.length)p.push("C"+s.coyote.i+"."+(s.coyote.d||1));
+  if(s.eg)p.push("E"+s.eg.k+"."+(s.eg.at-(s.steps||0)));
+  if(s.rabbit)p.push("W"+s.rabbit.x+"."+s.rabbit.y);
+  return p.join("|");
+}
+
+function startState(lvl){
+  const s=cloneState(lvl);
+  s.steps=0;
+  if(!s.dir)s.dir={a:true,b:false};
+  s.bearT={};
+  initEagle(s);
+  return s;
+}
+
+const CAP=120000;
+
+/* One pass over the reachable state space: the shortest solution, the move
+   graph, and which states can still reach a win. */
+function explore(lvl){
+  const start=startState(lvl);
+  const nodes=new Map();          /* key -> {s, kids:[key|null,…], depth} */
+  const k0=stateKey(start);
+  nodes.set(k0,{s:start,kids:[],depth:0,from:null,via:null});
+  const queue=[k0];
+  let head=0, truncated=false, deaths=0, moves=0;
+
+  while(head<queue.length){
+    if(nodes.size>=CAP){truncated=true;break;}
+    const ck=queue[head++];
+    const node=nodes.get(ck);
+    if(solved(node.s))continue;           /* a win is terminal */
+    for(const who of ["a","b"]){
+      const s=cloneState(node.s);
+      const r=applyJump(s,who);
+      moves++;
+      if(r.event==="dead"){deaths++;node.kids.push(null);continue;}
+      const k=stateKey(s);
+      if(!nodes.has(k)){
+        nodes.set(k,{s,kids:[],depth:node.depth+1,from:ck,via:who});
+        queue.push(k);
+      }
+      node.kids.push(k);
+    }
+  }
+
+  /* which states can still reach a win, worked backwards from the wins */
+  const win=new Set();
+  const parents=new Map();
+  for(const [k,v] of nodes)for(const c of v.kids){
+    if(!c)continue;
+    if(!parents.has(c))parents.set(c,[]);
+    parents.get(c).push(k);
+  }
+  const stack=[];
+  for(const [k,v] of nodes)if(solved(v.s)){win.add(k);stack.push(k);}
+  while(stack.length){
+    const k=stack.pop();
+    for(const p of (parents.get(k)||[]))if(!win.has(p)){win.add(p);stack.push(p);}
+  }
+
+  /* shortest solution, by walking back up the BFS tree from the nearest win */
+  let best=null;
+  for(const [k,v] of nodes){
+    if(!solved(v.s))continue;
+    if(!best||v.depth<nodes.get(best).depth)best=k;
+  }
+  let path=null;
+  if(best){
+    path=[];
+    let cur=best;
+    while(nodes.get(cur).from!==null){
+      path.unshift(nodes.get(cur).via);
+      cur=nodes.get(cur).from;
+    }
+  }
+
+  return {nodes,win,path,truncated,deaths,moves,solvable:!!best,
+    solvedKey:best,startKey:k0};
+}
+
+/* Replay a path and record what each press actually did. */
+function replay(lvl,path){
+  const s=startState(lvl);
+  const kinds={move:0,push:0,swing:0,turn:0};
+  const seen=new Set();
+  let coordination=0, lastWho=null;
+  for(const who of path){
+    const r=applyJump(s,who);
+    kinds[r.kind]=(kinds[r.kind]||0)+1;
+    seen.add(stateKey(s));
+    if(lastWho&&who!==lastWho)coordination++;
+    lastWho=who;
+  }
+  return {kinds,coordination};
+}
+
+function analyse(lvl){
+  const ex=explore(lvl);
+  const total=ex.nodes.size;
+  if(!ex.solvable){
+    return {solvable:false,states:total,truncated:ex.truncated};
+  }
+
+  const steps=ex.path.length;
+  const rp=replay(lvl,ex.path);
+
+  /* distance to a win from every live state, worked backwards */
+  const dist=new Map();
+  {
+    const parents=new Map();
+    for(const [k,v] of ex.nodes)for(const c of v.kids){
+      if(!c)continue;
+      if(!parents.has(c))parents.set(c,[]);
+      parents.get(c).push(k);
+    }
+    const q=[];
+    for(const [k,v] of ex.nodes)if(solved(v.s)){dist.set(k,0);q.push(k);}
+    let h=0;
+    while(h<q.length){
+      const k=q[h++], d=dist.get(k);
+      for(const p of (parents.get(k)||[]))if(!dist.has(p)){dist.set(p,d+1);q.push(p);}
+    }
+  }
+
+  /* --- Category A: structure --------------------------------------- */
+  /* A press is only a decision if the two buttons lead somewhere materially
+     different. Regret is what the worse button costs: extra steps to the win,
+     or the whole level when it throws the win away. */
+  let decisions=0, forced=0, traps=0, regretSum=0, regretMax=0, judged=0;
+  const LOST=14;                        /* what an unrecoverable press is worth */
+  for(const [k,v] of ex.nodes){
+    if(!ex.win.has(k)||solved(v.s))continue;
+    const d0=dist.get(k);
+    const costs=v.kids.map(c=>{
+      if(!c)return LOST;                 /* a losing move */
+      if(!dist.has(c))return LOST;       /* leads somewhere unwinnable */
+      return dist.get(c)-(d0-1);         /* steps wasted versus the best line */
+    });
+    if(!costs.length)continue;
+    const good=v.kids.filter(c=>c&&ex.win.has(c));
+    if(good.length<2)forced++;
+    const worst=Math.max(...costs), bestc=Math.min(...costs);
+    const regret=worst-bestc;
+    judged++;
+    regretSum+=regret;
+    if(regret>regretMax)regretMax=regret;
+    if(regret>=2)decisions++;            /* a press worth thinking about */
+    if(worst>=LOST)traps++;              /* one button here loses the level */
+  }
+  const live=[...ex.nodes.keys()].filter(k=>ex.win.has(k)).length;
+  const stuck=total-live;
+  const regretAvg=judged?regretSum/judged:0;
+  const decisionRate=judged?decisions/judged:0;
+  const trapRate=judged?traps/judged:0;
+
+  /* how many distinct shortest solutions reach a win in `steps` presses */
+  let solCount=0;
+  {
+    const seen=new Map([[ex.startKey,1]]);
+    let layer=[ex.startKey];
+    for(let d=0;d<steps&&layer.length;d++){
+      const next=new Map();
+      for(const k of layer){
+        const n=ex.nodes.get(k);
+        for(const c of n.kids){
+          if(!c)continue;
+          const cn=ex.nodes.get(c);
+          if(cn.depth!==n.depth+1)continue;
+          next.set(c,(next.get(c)||0)+(seen.get(k)||1));
+        }
+      }
+      for(const [k,v] of next)seen.set(k,v);
+      layer=[...next.keys()];
+    }
+    for(const k of layer)if(solved(ex.nodes.get(k).s))solCount+=seen.get(k)||1;
+  }
+
+  /* --- Category B: mechanics on the board -------------------------- */
+  const count=t=>lvl.content.filter(c=>c===t).length;
+  const edges=[...lvl.h,...lvl.v].filter(Boolean);
+  const mech={
+    boxes:count("box"),
+    gates:edges.filter(e=>e&&e.g).length,
+    fences:edges.filter(e=>e==="fence").length,
+    bears:count("bear"),
+    coyote:(lvl.coyote&&lvl.coyote.path&&lvl.coyote.path.length)?1:0,
+    eagle:(lvl.eagle&&lvl.eagle.tiles&&lvl.eagle.tiles.length)?1:0,
+    water:lvl.terrain.filter(t=>t==="water").length,
+    berries:count("berry"),
+    rabbit:lvl.rabbit?1:0
+  };
+  const kinds=mech.boxes>0;
+  const activeMechanics=
+    (mech.boxes?1:0)+(mech.gates?1:0)+(mech.fences?1:0)+
+    (mech.bears?1:0)+mech.coyote+mech.eagle+(mech.water?1:0)+
+    (mech.berries?1:0)+mech.rabbit;
+  const timed=(mech.bears?1:0)+mech.coyote+mech.eagle;
+
+  /* --- the four scored components, each 0-100 ---------------------- */
+  const clamp=v=>Math.max(0,Math.min(100,v));
+  /* solution length: 4 presses is trivial, 40 is a long haul */
+  const cSolution=clamp((steps-4)/34*100);
+  /* decisions: how often a press matters, and how much the wrong one costs */
+  const cDecision=clamp(decisionRate*100*0.55+clamp(regretAvg*22)*0.3+
+                        clamp(regretMax*7)*0.15);
+  /* dead-end risk: the share of the space that is a trap, and how often a
+     single press at a live position can throw the level away */
+  const cDeadEnd=clamp((total?stuck/total*100:0)*0.6+trapRate*100*1.6*0.4);
+  /* mechanics: how many systems are live, weighted toward the timed ones */
+  const cMechanic=clamp(activeMechanics*10+timed*13+
+                        Math.min(18,(rp.kinds.push+rp.kinds.swing)*3));
+
+  /* the proposal's weights, renormalised over what can be measured
+     automatically — the 10% playtest slot has no data behind it */
+  const W={solution:25,decision:25,deadEnd:20,mechanic:20};
+  const wSum=W.solution+W.decision+W.deadEnd+W.mechanic;
+  const score=(cSolution*W.solution+cDecision*W.decision+
+               cDeadEnd*W.deadEnd+cMechanic*W.mechanic)/wSum;
+
+  const band=score<=20?"Very easy":score<=40?"Easy":score<=60?"Medium":
+             score<=80?"Hard":"Very hard";
+
+  return {
+    solvable:true, truncated:ex.truncated,
+    steps, states:total, live, stuck,
+    stuckPct: total?Math.round(stuck/total*100):0,
+    decisions, forced, solCount, judged,
+    regretAvg, regretMax, traps, trapRate,
+    branching: ex.moves/Math.max(1,total),
+    deaths: ex.deaths,
+    coordination: rp.coordination,
+    kinds: rp.kinds,
+    mech, activeMechanics, timed,
+    parts:{solution:cSolution,decision:cDecision,deadEnd:cDeadEnd,mechanic:cMechanic},
+    weights:W,
+    score, out10: score/10, band,
+    path: ex.path.map(p=>p==="a"?"L":"R").join("")
+  };
+}
+
+/* ANALYSER-START
+   Difficulty analysis. tools/difficulty.js extracts this block from
+   src/sandbox.html and runs it over levels/, so the page and the
+   calibration script can never disagree. Keep the markers intact.
+
+   Phase 1 of the difficulty-evaluation proposal: a breadth-first search over
+   both buttons, the structural and gameplay metrics that fall out of it, and
+   a weighted score. Human playtesting is the proposal's fifth category and
+   has no data yet, so its 10% is left out and the rest are renormalised.   */
+
+/* cols, rows, terrain and the authored enemy paths never change during a
+   run, so they are shared rather than copied — this is the hot path. */
+function anClone(s){
+  const c={cols:s.cols,rows:s.rows,terrain:s.terrain,
+    content:s.content.slice(),h:s.h.slice(),v:s.v.slice(),
+    a:{x:s.a.x,y:s.a.y},b:{x:s.b.x,y:s.b.y},
+    dir:{a:s.dir.a,b:s.dir.b},anchor:s.anchor,steps:s.steps,
+    eagle:s.eagle,name:s.name};
+  if(s.bearT){c.bearT={};for(const k in s.bearT)c.bearT[k]=s.bearT[k];}
+  if(s.coyote)c.coyote={path:s.coyote.path,i:s.coyote.i,d:s.coyote.d};
+  if(s.eg)c.eg={k:s.eg.k,at:s.eg.at};
+  if(s.rabbit)c.rabbit={x:s.rabbit.x,y:s.rabbit.y};
+  return c;
+}
+
+function anKey(s){
+  let k=s.a.x+","+s.a.y+","+s.b.x+","+s.b.y+","+(s.dir.a?1:0)+(s.dir.b?1:0)+"|";
+  for(let i=0;i<s.content.length;i++){
+    const c=s.content[i];
+    if(c==="box"||c==="berry")k+=i+c[0];
+  }
+  k+="|";
+  for(const arr of ["h","v"]){
+    const A=s[arr];
+    for(let i=0;i<A.length;i++){const v=A[i];if(v&&v.g)k+=arr+i+":"+v.h[0]+"."+v.h[1]+",";}
+  }
+  if(s.bearT){k+="|";for(const i in s.bearT)if(s.bearT[i]!=null)k+=i+"="+s.bearT[i]+",";}
+  if(s.coyote&&s.coyote.path&&s.coyote.path.length)k+="|c"+s.coyote.i+"."+(s.coyote.d||1);
+  if(s.eg)k+="|e"+s.eg.k+"."+(s.eg.at-(s.steps||0));
+  if(s.rabbit)k+="|r"+s.rabbit.x+","+s.rabbit.y;
+  return k;
+}
+
+function anStart(level){
+  const s=JSON.parse(JSON.stringify(level));
+  s.steps=0;
+  if(!s.dir)s.dir={a:true,b:false};
+  s.bearT={};
+  initEagle(s);
+  return s;
+}
+
+/* What a press actually did, read from the board rather than from the
+   return value, so this works against either copy of the rules. */
+function anKind(before,after){
+  if(before.a.x!==after.a.x||before.a.y!==after.a.y
+   ||before.b.x!==after.b.x||before.b.y!==after.b.y)return "move";
+  for(const arr of ["h","v"])
+    for(let i=0;i<before[arr].length;i++)
+      if(before[arr][i]!==after[arr][i])return "swing";
+  for(let i=0;i<before.content.length;i++)
+    if(before.content[i]!==after.content[i])return "push";
+  return "turn";
+}
+
+/* Explores every state both buttons can reach, then works backwards from the
+   wins to find which states can still be won from. */
+function analyse(level,cap){
+  cap=cap||120000;
+  const start=anStart(level);
+  const idx=new Map(), succ=[], depth=[], paths=[], win=[], live=[];
+  const queue=[start];
+  idx.set(anKey(start),0); succ.push([]); depth.push(0); paths.push(1);
+  win.push(solved(start)); live.push(false);
+
+  let head=0, truncated=false;
+  while(head<queue.length){
+    if(idx.size>=cap){truncated=true;break;}
+    const u=queue[head], ui=head; head++;
+    if(win[ui])continue;                       /* a solved board ends the run */
+    for(const who of ["a","b"]){
+      const s=anClone(u);
+      const r=applyJump(s,who);
+      if(r&&r.event==="dead")continue;         /* water, bear, coyote, eagle */
+      const k=anKey(s);
+      let vi=idx.get(k);
+      if(vi===undefined){
+        vi=queue.length;
+        idx.set(k,vi); queue.push(s); succ.push([]);
+        depth.push(depth[ui]+1); paths.push(paths[ui]);
+        win.push(solved(s)); live.push(false);
+      }else if(depth[vi]===depth[ui]+1){
+        paths[vi]+=paths[ui];
+      }
+      succ[ui].push(vi);
+    }
+  }
+
+  const n=queue.length;
+  let minMoves=null, solutions=0;
+  for(let i=0;i<n;i++)if(win[i]&&(minMoves===null||depth[i]<minMoves))minMoves=depth[i];
+  if(minMoves!==null)for(let i=0;i<n;i++)if(win[i]&&depth[i]===minMoves)solutions+=paths[i];
+
+  /* which states can still reach a win */
+  const pred=[];
+  for(let i=0;i<n;i++)pred.push([]);
+  for(let i=0;i<n;i++)for(const v of succ[i])pred[v].push(i);
+  const stack=[];
+  for(let i=0;i<n;i++)if(win[i]){live[i]=true;stack.push(i);}
+  while(stack.length){
+    const v=stack.pop();
+    for(const u of pred[v])if(!live[u]){live[u]=true;stack.push(u);}
+  }
+
+  /* Only states that were actually expanded can be judged: a frontier state
+     left unexplored by the cap has no successors and would read as a dead end. */
+  const judged=truncated?head:n;
+  let liveCount=0, forks=0, forced=0, edges=0;
+  for(let i=0;i<judged;i++){
+    edges+=succ[i].length;
+    if(!live[i])continue;
+    liveCount++;
+    if(succ[i].length<2)continue;
+    const a=succ[i][0], b=succ[i][1];
+    if(a===b)continue;                         /* both buttons do the same thing */
+    forks++;
+    if(live[a]!==live[b])forced++;             /* only one option keeps the win */
+  }
+
+  /* replay one optimal solution: the presses it needs, what each one did, and
+     where the other button would have thrown the level away */
+  let path="", critical=0, flips=0, pushes=0, swings=0, switches=0;
+  if(minMoves!==null){
+    let goal=-1;
+    for(let i=0;i<n;i++)if(win[i]&&depth[i]===minMoves){goal=i;break;}
+    const back=[];
+    let cur=goal;
+    while(cur!==0){
+      let prev=-1;
+      for(const u of pred[cur])if(depth[u]===depth[cur]-1){prev=u;break;}
+      if(prev<0)break;
+      back.push([prev,cur]); cur=prev;
+    }
+    back.reverse();
+    let last=null;
+    for(const [u,v] of back){
+      const who=(succ[u][0]===v)?"a":"b";
+      path+=(who==="a")?"L":"R";
+      if(last&&last!==who)switches++;
+      last=who;
+      const kind=anKind(queue[u],queue[v]);
+      if(kind==="turn")flips++;
+      else if(kind==="push")pushes++;
+      else if(kind==="swing")swings++;
+      const other=succ[u].find(x=>x!==v);
+      if(other===undefined||!live[other])critical++;
+    }
+  }
+
+  return {
+    solvable:minMoves!==null, truncated,
+    states:n, minMoves, solutions,
+    judged,
+    deadEnds:judged-liveCount,
+    deadRatio:judged?(judged-liveCount)/judged:0,
+    forks, forced,
+    forcedRatio:forks?forced/forks:0,
+    branching:judged?edges/judged:0,
+    critical, flips, pushes, swings, switches, path
+  };
+}
+
+/* What a level is built from, and how many clocks run at once. */
+function mechanics(level){
+  const has={};
+  for(const v of level.content)if(v)has[v]=(has[v]||0)+1;
+  for(const t of level.terrain)if(t==="water")has.water=(has.water||0)+1;
+  let fence=0,gate=0;
+  for(const arr of ["h","v"])for(const v of (level[arr]||[])){
+    if(v==="fence")fence++; else if(v&&v.g)gate++;
+  }
+  if(fence)has.fence=fence;
+  if(gate)has.gate=gate;
+  if(level.coyote&&level.coyote.path&&level.coyote.path.length)has.coyote=1;
+  if(level.eagle&&level.eagle.tiles&&level.eagle.tiles.length)has.eagle=level.eagle.tiles.length;
+  if(level.rabbit)has.rabbit=1;
+  const enemies=["bear","coyote","eagle"].filter(k=>has[k]).length;
+  return {has,enemies};
+}
+
+/* Each category scores 0-100 on its own, then the four are weighted.
+   The anchors below are design assumptions calibrated against the 30-level
+   campaign, not measurements. Recalibrate them once there is player data. */
+function scoreLevel(m,level){
+  const span=(v,lo,hi)=>Math.max(0,Math.min(100,100*(v-lo)/(hi-lo)));
+  const mech=mechanics(level);
+  const moves=m.minMoves||0;
+
+  /* how long the route is, and how sparse the solutions are within everything
+     the player could have done instead */
+  const len=span(moves,4,32);
+  const density=(m.states&&m.solutions)?m.solutions/m.states:1;
+  const sparse=span(-Math.log10(density),1,4);
+  const solution=0.65*len+0.35*sparse;
+
+  /* how often a press is a real choice rather than the only surviving option */
+  const decision=0.6*span(m.forcedRatio,0,0.35)
+                +0.4*span(moves?m.critical/moves:0,0,0.45);
+
+  /* how easy it is to put the level beyond saving */
+  const dead=span(m.deadRatio,0,0.35);
+
+  /* what machinery is in play, how many clocks run at once, and how much the
+     solution actually has to manipulate rather than walk past */
+  const w={box:14,gate:18,fence:7,water:9,bear:16,coyote:16,eagle:14,berry:4,rabbit:11};
+  let kit=0;
+  for(const k in mech.has)if(w[k])kit+=w[k];
+  kit+=Math.max(0,mech.enemies-1)*12;
+  /* coordination: managing the pair's handedness, and working the objects */
+  const handed=span(moves?m.flips/moves:0,0,0.3);
+  const worked=span(m.pushes+m.swings,0,5);
+  const interactions=Math.min(100,0.55*Math.min(100,kit)+0.25*handed+0.20*worked);
+
+  const parts=[
+    ["Solution complexity",solution,0.25],
+    ["Decision complexity",decision,0.25],
+    ["Dead-end risk",dead,0.20],
+    ["Mechanic interactions",interactions,0.20]
+  ];
+  const total=parts.reduce((a,p)=>a+p[2],0);
+  /* the four categories rarely peak together, so the weighted mean sits low by
+     construction; this stretches it across the proposal's bands */
+  const raw=parts.reduce((a,p)=>a+p[1]*p[2],0)/total;
+  const score=Math.max(0,Math.min(100,span(raw,2,70)));
+  const band=score<=20?"Very easy":score<=40?"Easy":score<=60?"Medium":score<=80?"Hard":"Very hard";
+  return {score,band,raw,parts:parts.map(p=>[p[0],p[1],p[2]/total]),mech};
+}
+/* ANALYSER-END */
 
 /* ---------- render ---------- */
 const board=document.getElementById("board");
@@ -699,6 +1274,7 @@ function render(){
       if(mode==="edit"&&(tool==="fence"||tool==="gate")){
         const h=document.createElement("span");h.className="hot "+side;
         h.onclick=ev=>{ev.stopPropagation();
+          hideAnalysis();
           if(tool==="fence")setEdge(level,x,y,side,(getEdge(level,x,y,side)==="fence")?null:"fence");
           else cycleGate(level,x,y,side);
           render();};
@@ -769,6 +1345,7 @@ drawTools();
 
 function paint(x,y){
   const s=level,i=I(s,x,y);
+  hideAnalysis();
   if(tool==="fence"||tool==="gate")return;   /* those go on the edges, not the tiles */
   if(tool==="eagle"){
     if(!s.eagle||!s.eagle.tiles)s.eagle={tiles:[]};
@@ -828,16 +1405,157 @@ document.getElementById("bUndo").onclick=()=>{
   const o=JSON.parse(p); game=o.g; msg=o.m; won=false; render();
 };
 document.getElementById("bReset").onclick=()=>{game=JSON.parse(JSON.stringify(level));game.steps=0;initEagle(game);undoStack=[];msg=null;won=false;render();};
+document.getElementById("bAnalyze").onclick=e=>{
+  const d=document.getElementById("dDiff"), body=document.getElementById("diffBody");
+  d.hidden=false; d.open=true;
+  body.innerHTML='<p class="note">Searching the state space\u2026</p>';
+  e.target.disabled=true;
+  setTimeout(()=>{
+    let r;
+    try{ r=analyse(level); }
+    catch(err){ body.innerHTML='<p class="note warn">Analysis failed: '+err.message+'</p>';
+                e.target.disabled=false; return; }
+    body.innerHTML=reportHTML(r);
+    e.target.disabled=false;
+    d.scrollIntoView({block:"nearest",behavior:"smooth"});
+  },30);
+};
+
+function fact(label,val){return `<div class="fact"><span>${label}</span><b>${val}</b></div>`;}
+function barRow(label,val,weight){
+  return `<div class="bar"><span>${label}</span>`+
+    `<span class="track"><span class="fill" style="width:${Math.round(val)}%"></span></span>`+
+    `<span class="w">${Math.round(val)}</span></div>`;
+}
+function reportHTML(r){
+  if(!r.solvable)
+    return '<p class="note warn"><b>No solution found.</b> '+
+      (r.truncated
+        ? 'The search hit its state cap of '+r.states.toLocaleString()+
+          ' positions, so the level may still be solvable by a longer route than this can reach.'
+        : 'Every one of the '+r.states.toLocaleString()+
+          ' reachable positions was explored and none completes the level.')+
+      '</p>';
+  const m=r.mech, k=r.kinds;
+  const names=[];
+  if(m.boxes)names.push(m.boxes+" box"+(m.boxes>1?"es":""));
+  if(m.gates)names.push(m.gates+" gate"+(m.gates>1?"s":""));
+  if(m.fences)names.push(m.fences+" fence"+(m.fences>1?"s":""));
+  if(m.bears)names.push(m.bears+" bear"+(m.bears>1?"s":""));
+  if(m.coyote)names.push("coyote");
+  if(m.eagle)names.push("eagle");
+  if(m.water)names.push("water");
+  if(m.berries)names.push(m.berries+" berr"+(m.berries>1?"ies":"y"));
+  if(m.rabbit)names.push("rabbit");
+
+  return `
+<div class="score">
+  <b>${r.out10.toFixed(1)}</b><span class="of">/ 10</span>
+  <span class="pill">${r.band}</span>
+  <span class="of">${Math.round(r.score)} / 100 internal</span>
+</div>
+
+<div class="bars">
+  ${barRow("Solution length",r.parts.solution,25)}
+  ${barRow("Decisions",r.parts.decision,25)}
+  ${barRow("Dead-end risk",r.parts.deadEnd,20)}
+  ${barRow("Mechanics",r.parts.mechanic,20)}
+</div>
+
+<div class="facts">
+  ${fact("Shortest solution",r.steps+" steps")}
+  ${fact("Shortest routes",r.solCount)}
+  ${fact("Reachable states",r.states.toLocaleString())}
+  ${fact("Decision points",r.decisions)}
+  ${fact("Unwinnable",r.stuckPct+"%")}
+  ${fact("Branching",r.branching.toFixed(2))}
+  ${fact("Hand-offs",r.coordination)}
+  ${fact("Losing moves",r.deaths)}
+</div>
+
+<p class="note">
+  <b>Solution:</b> <code>${r.path}</code><br>
+  <b>Presses:</b> ${k.move} moves, ${k.push} pushes, ${k.swing} gate swings, ${k.turn} turn-arounds.<br>
+  <b>On the board:</b> ${names.length?names.join(", "):"nothing but the chicks and the coops"}.
+  ${r.stuckPct>=25?'<br><span class="warn"><b>Watch out:</b> '+r.stuckPct+
+    '% of reachable positions can no longer be won \u2014 easy to wreck by accident.</span>':""}
+  ${r.truncated?'<br><span class="warn">The search hit its cap, so the state counts are a floor, not a total.</span>':""}
+</p>
+
+<p class="note">
+  Weighted 25/25/20/20 after the proposal, renormalised over the four automated
+  categories \u2014 the 10% playtest slot has no data behind it yet. Scored out of
+  100 for resolution and shown out of 10, since the finer figure implies a
+  precision this cannot support. Treat it as a way to compare levels and catch
+  outliers, not as a verdict.
+</p>`;
+}
+
 document.getElementById("bTurn").onclick=e=>{sharedTurn=!sharedTurn;
   e.target.textContent="Bump turns: "+(sharedTurn?"both chicks":"bumped chick only");render();};
+const BANDCOL={"Very easy":"var(--good)","Easy":"var(--good)","Medium":"var(--accent)",
+  "Hard":"var(--danger)","Very hard":"var(--danger)"};
+function showAnalysis(level){
+  const el=document.getElementById("analysis");
+  const m=analyse(level);
+  if(!m.solvable){
+    el.hidden=false;
+    el.innerHTML='<div class="ahead"><span class="ascore">\u2014</span>'+
+      '<span class="aband" style="background:var(--danger)">Unsolvable</span></div>'+
+      '<p class="anote">Nothing either button can do from this board reaches both coops.'+
+      (m.truncated?" The search hit its cap, so a solution may exist beyond it.":"")+'</p>';
+    return;
+  }
+  const s=scoreLevel(m,level);
+  const col=BANDCOL[s.band]||"var(--bar)";
+  const bars=s.parts.map(([name,val,w])=>
+    '<div class="abar"><span>'+name+' <i style="color:var(--muted)">\u00d7'+Math.round(w*100)+'%</i></span>'+
+    '<i>'+Math.round(val)+'</i>'+
+    '<span class="atrack"><b style="width:'+Math.max(1,Math.round(val))+'%;background:'+col+'"></b></span></div>').join("");
+  const cell=(k,v)=>'<div><dt>'+k+'</dt><dd>'+v+'</dd></div>';
+  el.hidden=false;
+  el.innerHTML=
+    '<div class="ahead"><span class="ascore">'+Math.round(s.score)+
+      '<small>/100</small></span>'+
+      '<span class="aband" style="background:'+col+'">'+s.band+'</span>'+
+      '<span class="ascore" style="font-size:.95rem;font-weight:600;color:var(--muted)">'+
+        (s.score/10).toFixed(1)+'/10</span></div>'+
+    '<div class="abars">'+bars+'</div>'+
+    '<dl class="agrid">'+
+      cell("Min moves",m.minMoves)+
+      cell("States",m.states.toLocaleString()+(m.truncated?"+":""))+
+      cell("Optimal routes",m.solutions.toLocaleString())+
+      cell("Dead ends",Math.round(100*m.deadRatio)+"%")+
+      cell("Forced presses",Math.round(100*m.forcedRatio)+"%")+
+      cell("Critical moves",m.critical)+
+      cell("Turn-arounds",m.flips)+
+      cell("Pushes / swings",m.pushes+" / "+m.swings)+
+    '</dl>'+
+    '<p class="anote">Shortest solution <span class="aseq">'+(m.path||"\u2014")+'</span></p>'+
+    '<p class="anote">Player data is the fifth category in the scoring model and has none yet, '+
+      'so its 10% is dropped and the four above are renormalised.'+
+      (m.truncated?" <b>The search hit its state cap, so the dead-end figure is a lower bound and the score is approximate.</b>":"")+'</p>';
+}
+document.getElementById("bAnalyse").onclick=e=>{
+  const el=document.getElementById("analysis");
+  el.hidden=false;
+  el.innerHTML='<p class="anote" style="margin:0">Searching every board both buttons can reach\u2026</p>';
+  e.target.disabled=true;
+  setTimeout(()=>{
+    try{ showAnalysis(level); }
+    catch(err){ el.innerHTML='<p class="anote" style="margin:0">Analysis failed: '+err.message+'</p>'; }
+    e.target.disabled=false;
+  },30);
+};
 document.getElementById("bResize").onclick=()=>{
   const c=+document.getElementById("iCols").value,r=+document.getElementById("iRows").value;
   level=blank(Math.min(16,Math.max(3,c)),Math.min(16,Math.max(3,r)));
+  hideAnalysis();
   syncFields(); setMode("edit");
 };
 document.getElementById("bClear").onclick=()=>{
   const n=level.name,t=level.notes;
-  level=blank(level.cols,level.rows); level.name=n; level.notes=t; setMode("edit");
+  level=blank(level.cols,level.rows); level.name=n; level.notes=t; hideAnalysis(); setMode("edit");
 };
 document.getElementById("iName").oninput=e=>level.name=e.target.value;
 document.getElementById("iNotes").oninput=e=>level.notes=e.target.value;
@@ -891,9 +1609,10 @@ function entry(obj,label,onLoad,onDelete){
   if(level&&level.name===obj.name)li.className="on";
   return li;
 }
+function hideAnalysis(){const el=document.getElementById("analysis");if(el){el.hidden=true;el.innerHTML="";}}
 function openLevel(obj){
   level=fixLevel(JSON.parse(JSON.stringify(obj)));
-  syncFields(); setMode("play"); renderSaves(); drawer(false);
+  syncFields(); setMode("play"); renderSaves(); drawer(false); hideAnalysis();
 }
 /* the drawer is only a drawer on a phone; on a wide screen the panel is always there */
 function drawer(open){
