@@ -63,7 +63,9 @@ The coyote path and the eagle's targets are tapped out in order and numbered.
 ## Levels
 
 `levels/` holds a 30-level campaign, `Level_01` through `Level_30`, with coops as
-the only objective. Every one is machine-verified solvable; each file's `notes`
+the only objective. Every board is framed by one tile of water, so the rim is
+fatal rather than a free turn-around; `tools/gen.js` applies that frame, which
+is why the ASCII maps in `tools/levels.js` show only the interior. Every one is machine-verified solvable; each file's `notes`
 field carries its chapter, design intent, target difficulty and shortest
 solution as a press sequence.
 

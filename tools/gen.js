@@ -1,6 +1,7 @@
 const fs=require("fs");
 const {parse}=require("./build");
 const {solve,deadEnds}=require("./solver");
+const {addRing}=require("./ring");
 const E=require("./engine");
 const defs=require("./levels.js").slice();
 
@@ -44,7 +45,9 @@ const rows=[];
 defs.forEach((def,i)=>{
   const num=String(i+1).padStart(2,"0");
   const id="Level_"+num;
-  const lvl=parse({...def,name:id});
+  /* every board is framed by one tile of water, so the rim is fatal
+     rather than a free turn-around */
+  const lvl=addRing(parse({...def,name:id}));
   const r=solve(lvl);
   const d=r.solvable?deadEnds(lvl):null;
   if(!r.solvable){console.log(id,"UNSOLVABLE");return;}
