@@ -3,7 +3,7 @@
 
 module.exports=[
 /* ================= Chapter 1 — learning the basics ================= */
-{n:1,target:1,name:"01 · First steps",
+{n:1,type:"tutorial",target:1,name:"01 · First steps",
  notes:"Two presses, two chicks, nothing in the way. Teaches that a press moves one chick around the other and that the pair must finish side by side in the coops.",
  map:`
 .....
@@ -12,7 +12,7 @@ module.exports=[
 ..CC.
 .....`},
 
-{n:2,target:1.5,name:"02 · Around the oak",
+{n:2,type:"practice",target:1.5,name:"02 · Around the oak",
  notes:"A tree sits between the pair and the coops. Teaches that a blocked press turns both chicks around instead of moving them.",
  map:`
 ......
@@ -22,7 +22,7 @@ module.exports=[
 ..CC..
 ......`},
 
-{n:3,target:2,name:"03 · The first box",
+{n:3,type:"new",target:2,name:"03 · The first box",
  notes:"A box blocks the approach. Teaches that bumping a box shoves it and costs a step without moving the chick.",
  map:`
 .......
@@ -32,7 +32,7 @@ module.exports=[
 ...CC..
 .......`},
 
-{n:4,target:2.5,name:"04 · Two in the way",
+{n:4,type:"practice",target:2.5,name:"04 · Two in the way",
  notes:"Two boxes, and only one of them needs moving. Teaches that pushing is a choice, not a chore.",
  map:`
 .......
@@ -43,7 +43,7 @@ module.exports=[
 ...CC..
 .......`},
 
-{n:5,target:3.5,name:"05 · The long way round",
+{n:5,type:"challenge",target:3.5,name:"05 · The long way round",
  notes:"Trees split the field. Movement and boxes together, with the handedness of the pair deciding which side you commit to.",
  map:`
 ........
@@ -53,7 +53,7 @@ module.exports=[
 .T.CC...
 ........`},
 
-{n:6,target:2.5,name:"06 · The swinging gate",
+{n:6,type:"new",target:2.5,name:"06 · The swinging gate",
  notes:"A gate bars the way. Teaches that bumping a gate swings it 90 degrees about its hinge and that the chick stays put while it does.",
  gates:["3,2:n@3,2"],
  map:`
@@ -63,7 +63,7 @@ module.exports=[
 ..TCCT.
 .......`},
 
-{n:7,target:3.5,name:"07 · Mind the hinge",
+{n:7,type:"practice",target:3.5,name:"07 · Mind the hinge",
  notes:"The gate's hinge decides which way it opens, and the open gate lands across the route you wanted. Think about where it ends up, not just that it moves.",
  gates:["3,2:n@4,2","2,3:w@2,3"],
  map:`
@@ -74,7 +74,7 @@ module.exports=[
 ..TCC..
 .......`},
 
-{n:8,target:3,name:"08 · Two doors",
+{n:8,type:"new",target:3,name:"08 · Two doors",
  notes:"Two gates on the same approach. NOTE: the design doc calls for a one-way gate here; the game has only the swinging gate, so this teaches sequencing two swings instead.",
  gates:["2,2:n@2,2","4,2:n@5,2"],
  map:`
@@ -84,7 +84,7 @@ module.exports=[
 .T.CC.T
 .......`},
 
-{n:9,target:4,name:"09 · Gate and fence",
+{n:9,type:"combination",target:4,name:"09 · Gate and fence",
  notes:"A fence cannot be moved and a gate can. Teaches the player to read the two edge types apart. (Doc slot for combining gate types.)",
  fences:["3,1:w","3,2:w"],
  gates:["3,3:w@3,3"],
@@ -96,7 +96,7 @@ module.exports=[
 ..TCC..
 .......`},
 
-{n:10,target:5,name:"10 · Yard and barn",
+{n:10,type:"major",target:5,name:"10 · Yard and barn",
  notes:"Boxes and gates in one puzzle, and a box that can be shoved into the gate's swing arc to stop it opening. First real test of chapter one.",
  fences:["4,1:w"],
  gates:["4,3:w@4,3"],
@@ -110,7 +110,7 @@ module.exports=[
 ........`},
 
 /* ================= Chapter 2 — understanding enemies ================= */
-{n:11,target:3.5,name:"11 · The sleeping bear",
+{n:11,type:"new",target:3.5,name:"11 · The sleeping bear",
  notes:"Step inside the bear's ring and it wakes with a three-step fuse. Teaches that the red tiles are a countdown, not a wall.",
  map:`
 ........
@@ -121,7 +121,7 @@ module.exports=[
 ...CC...
 ........`},
 
-{n:12,target:4,name:"12 · Bear's elbow room",
+{n:12,type:"practice",target:4,name:"12 · Bear's elbow room",
  notes:"The coops sit close enough to the bear that you have to enter its ring and leave again before the fuse runs out.",
  map:`
 ........
@@ -131,18 +131,18 @@ module.exports=[
 ...CC...
 ........`},
 
-{n:13,target:5,name:"13 · Two bears",
+{n:13,type:"challenge",target:5,name:"13 · Two bears",
  notes:"Overlapping rings. Leaving one bear's radius can put you inside the other's, and both fuses run at once.",
  map:`
-..........
-.lr.......
-.....X....
-...X......
-.....CC...
-..........
-..........`},
+............
+.lr.........
+.......X....
+............
+...X........
+.......CC...
+............`},
 
-{n:14,target:4,name:"14 · The coyote's beat",
+{n:14,type:"new",target:4,name:"14 · The coyote's beat",
  notes:"The coyote paces its path and turns around at each end. Teaches that it is a clock you can read, not a chaser.",
  map:`
 .........
@@ -152,7 +152,7 @@ module.exports=[
 ....CC...
 .........`},
 
-{n:15,target:5,name:"15 · Box the coyote out",
+{n:15,type:"combination",target:5,name:"15 · Box the coyote out",
  notes:"A box shoved into the coyote's lane shortens its patrol. Combines the box with the enemy that respects it.",
  map:`
 .........
@@ -163,7 +163,7 @@ module.exports=[
 ....CC...
 .........`},
 
-{n:16,target:6,name:"16 · Crossing the run",
+{n:16,type:"challenge",target:6,name:"16 · Crossing the run",
  notes:"The coops are on the far side of the coyote's run, so the pair must be on the right tiles at the right beat.",
  map:`
 ..........
@@ -175,7 +175,7 @@ module.exports=[
 .......CC.
 ..........`},
 
-{n:17,target:4.5,name:"17 · Shadow overhead",
+{n:17,type:"new",target:4.5,name:"17 · Shadow overhead",
  notes:"The eagle never lands. It marks a tile and strikes it three steps later, then moves to the next marked tile. Teaches reading the badge.",
  map:`
 ........
@@ -185,7 +185,7 @@ module.exports=[
 ...CC...
 ........`},
 
-{n:18,target:5,name:"18 · Three dives",
+{n:18,type:"practice",target:5,name:"18 · Three dives",
  notes:"Three marked tiles in rotation. The strike order repeats, so the level is a rhythm to learn rather than a risk to dodge.",
  map:`
 .........
@@ -196,7 +196,7 @@ module.exports=[
 ...CC....
 .........`},
 
-{n:19,target:6.5,name:"19 · Dive on the doorstep",
+{n:19,type:"challenge",target:6.5,name:"19 · Dive on the doorstep",
  notes:"The eagle targets the coops themselves. Arriving is not enough; you have to arrive on the right beat.",
  eagleAt:["3,4","4,4"],
  map:`
@@ -207,7 +207,7 @@ module.exports=[
 ...CC....
 .........`},
 
-{n:20,target:7,name:"20 · The whole farm",
+{n:20,type:"major",target:7,name:"20 · The whole farm",
  notes:"Boxes, a gate, a bear and a coyote on one board. First puzzle that asks the player to hold several clocks at once.",
  gates:["5,3:w@5,3"],
  map:`
@@ -221,7 +221,7 @@ module.exports=[
 ..........`},
 
 /* ================= Chapter 3 — mastery ================= */
-{n:21,target:5.5,name:"21 · Bear behind the boxes",
+{n:21,type:"combination",target:5.5,name:"21 · Bear behind the boxes",
  notes:"The box you need to move sits inside the bear's ring, so the push and the escape share one fuse.",
  map:`
 .........
@@ -232,7 +232,7 @@ module.exports=[
 ....CC...
 .........`},
 
-{n:22,target:6,name:"22 · Gated bear",
+{n:22,type:"combination",target:6,name:"22 · Gated bear",
  notes:"A gate stands between the pair and the coops, and swinging it takes a step you may not have while the bear is counting.",
  gates:["4,3:w@4,3"],
  map:`
@@ -243,7 +243,7 @@ module.exports=[
 .....CC..
 .........`},
 
-{n:23,target:4.5,name:"23 · Breathing room",
+{n:23,type:"recovery",target:4.5,name:"23 · Breathing room",
  notes:"Recovery level. Open ground, one gentle obstacle, several routes that all work. Room to experiment after two tight puzzles.",
  map:`
 .........
@@ -254,7 +254,7 @@ module.exports=[
 .....CC..
 .........`},
 
-{n:24,target:6.5,name:"24 · Shut the gate on him",
+{n:24,type:"combination",target:6.5,name:"24 · Shut the gate on him",
  notes:"Swinging the gate across the coyote's lane cuts its patrol short. The enemy and the mechanic solve each other.",
  gates:["4,2:w@4,2"],
  map:`
@@ -266,7 +266,7 @@ module.exports=[
 .......CC.
 ..........`},
 
-{n:25,target:7,name:"25 · Bear and bird",
+{n:25,type:"advanced",target:7,name:"25 · Bear and bird",
  notes:"A bear's fuse and the eagle's rotation run at different lengths, so the safe tiles keep changing underneath you.",
  map:`
 .........
@@ -277,7 +277,7 @@ module.exports=[
 ....CC...
 .........`},
 
-{n:26,target:5.5,name:"26 · More than one way",
+{n:26,type:"recovery",target:5.5,name:"26 · More than one way",
  notes:"Recovery and creative level. Open ground with scattered cover and one box that cannot be wedged anywhere fatal. Several distinct routes all work.",
  map:`
 ..........
@@ -289,7 +289,7 @@ module.exports=[
 ....CC....
 ..........`},
 
-{n:27,target:7.5,name:"27 · Bear, coyote, eagle",
+{n:27,type:"advanced",target:7.5,name:"27 · Bear, coyote, eagle",
  notes:"All three enemies on one board. Each is readable alone; together they leave a narrow window.",
  map:`
 ..........
@@ -301,7 +301,7 @@ module.exports=[
 .......CC.
 ..........`},
 
-{n:28,target:8,name:"28 · Everything at once",
+{n:28,type:"challenge",target:8,name:"28 · Everything at once",
  notes:"Boxes, a gate, a fence and two enemies. The route is short but almost every press is forced.",
  fences:["5,2:w"],
  gates:["5,4:w@5,4"],
@@ -315,7 +315,7 @@ module.exports=[
 .......CC.
 ..........`},
 
-{n:29,target:9,name:"29 · The gauntlet",
+{n:29,type:"challenge",target:9,name:"29 · The gauntlet",
  notes:"Long route, two enemies with different periods, and a box that must be moved early to open the finish.",
  gates:["6,3:w@6,3"],
  map:`
@@ -329,7 +329,7 @@ module.exports=[
 ........CC.
 ...........`},
 
-{n:30,target:10,name:"30 · Chick mates",
+{n:30,type:"final",target:10,name:"30 · Chick mates",
  notes:"Final challenge. Every mechanic in the game, and a finish that only works from one approach direction.",
  fences:["6,2:w"],
  gates:["6,4:w@6,4"],

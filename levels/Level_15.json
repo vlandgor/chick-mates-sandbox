@@ -445,5 +445,6 @@
   "a": true,
   "b": false
  },
- "rabbit": null
+ "rabbit": null,
+ "type": "combination"
 }

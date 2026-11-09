@@ -63,9 +63,17 @@ The coyote path and the eagle's targets are tapped out in order and numbered.
 ## Levels
 
 `levels/` holds a 30-level campaign, `Level_01` through `Level_30`, with coops as
-the only objective. Every board is framed by one tile of water, so the rim is
-fatal rather than a free turn-around; `tools/gen.js` applies that frame, which
-is why the ASCII maps in `tools/levels.js` show only the interior. Every one is machine-verified solvable; each file's `notes`
+the only objective. Every board is framed by one tile of water; `tools/gen.js`
+adds that frame, which is why the ASCII maps in `tools/levels.js` show only the
+interior.
+
+Whether the water bites depends on what the level is for. Levels that teach — a
+tutorial, a new mechanic, practice, or a recovery breather — have a fence along
+the shoreline, so a press into the rim turns the pair around and the level
+cannot be lost to a stray tap. Levels that test leave the water live. Chapter
+one is fenced throughout whatever its levels are for, because nothing there has
+taught the player that water is dangerous; the first live shoreline is level 13.
+Each level records its `type` so the rule is visible in the file. Every one is machine-verified solvable; each file's `notes`
 field carries its chapter, design intent, target difficulty and shortest
 solution as a press sequence.
 
