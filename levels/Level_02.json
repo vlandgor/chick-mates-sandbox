@@ -469,5 +469,6 @@
   "b": false
  },
  "rabbit": null,
- "type": "practice"
+ "type": "practice",
+ "status": "draft"
 }

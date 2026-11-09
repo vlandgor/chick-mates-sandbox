@@ -68,6 +68,9 @@ defs.forEach((def,i)=>{
   const title=def.name.replace(/^\d+\s·\s/,"");
   lvl.name=id;
   lvl.type=def.type;
+  /* verified solvable, but nobody has played it yet — a level becomes ready
+     in the sandbox once a person has played it and said so */
+  lvl.status="draft";
   lvl.notes=`${id} — ${title}\n\n${def.notes}\n\nShortest solution: ${r.steps} steps (${seq}).`;
   fs.writeFileSync(`${dir}/${id}.json`,JSON.stringify(lvl,null,1));
   rows.push({id,title,target:def.target,steps:r.steps,

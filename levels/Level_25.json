@@ -434,5 +434,6 @@
   "b": false
  },
  "rabbit": null,
- "type": "advanced"
+ "type": "advanced",
+ "status": "draft"
 }

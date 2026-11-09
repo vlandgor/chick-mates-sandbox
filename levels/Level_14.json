@@ -410,5 +410,6 @@
   "b": false
  },
  "rabbit": null,
- "type": "new"
+ "type": "new",
+ "status": "draft"
 }

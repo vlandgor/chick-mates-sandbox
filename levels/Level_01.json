@@ -389,5 +389,6 @@
   "b": false
  },
  "rabbit": null,
- "type": "tutorial"
+ "type": "tutorial",
+ "status": "draft"
 }

@@ -645,5 +645,6 @@
   "b": false
  },
  "rabbit": null,
- "type": "final"
+ "type": "final",
+ "status": "draft"
 }

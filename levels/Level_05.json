@@ -509,5 +509,6 @@
   "b": false
  },
  "rabbit": null,
- "type": "challenge"
+ "type": "challenge",
+ "status": "draft"
 }

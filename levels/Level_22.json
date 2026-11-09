@@ -387,5 +387,6 @@
   "b": false
  },
  "rabbit": null,
- "type": "combination"
+ "type": "combination",
+ "status": "draft"
 }

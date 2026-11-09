@@ -563,5 +563,6 @@
   "b": false
  },
  "rabbit": null,
- "type": "major"
+ "type": "major",
+ "status": "draft"
 }

@@ -74,6 +74,25 @@ coast without pretending the coast is safe. And a level can name a `seawall`
 side, which fences the waterline along one edge only — a wall the player can
 see and lean on. Levels 1 and 10 use one; the rest are open water.
 
+## Level status
+
+Every level carries a `status`: `ready`, `draft` or `test`. Only `ready` means
+"this belongs in the game" — it is the set a Unity sync would ask for. `test` is
+for boards that exist to try a mechanic rather than to be played.
+
+Set it on the open level under Board & situation, and filter the side panel by
+it. **Export ready levels** in the JSON panel emits just that set, each entry
+carrying its `type` and `status`.
+
+The whole campaign ships as `draft`. Every level is verified solvable and
+designed against the campaign doc, but none has been played by a person, and
+the design doc is clear that difficulty is only real once it has been
+playtested. Promote them as you play them.
+
+Status changes you make live in this browser, keyed by level name, so they
+follow the page rather than the files. The files carry the status they were
+generated with.
+
 ## Tools
 
 `tools/` is a Node port of the rules plus a breadth-first solver, used to verify

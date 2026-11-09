@@ -509,5 +509,6 @@
   "b": false
  },
  "rabbit": null,
- "type": "recovery"
+ "type": "recovery",
+ "status": "draft"
 }
