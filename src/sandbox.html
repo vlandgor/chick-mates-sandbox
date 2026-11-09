@@ -203,7 +203,7 @@ ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;co
   <label for="iNotes">Notes — decision, outcome, verdict</label>
   <textarea id="iNotes" placeholder="What choice does the player face? What happened? Fun / confusing / unfair?"></textarea>
   <div class="row" style="margin-top:10px">
-    <button class="btn" id="bSave">Save situation</button>
+    <button class="btn" id="bSave">Save board</button>
     <button class="btn" id="bClear">Clear board</button>
   </div>
 </details>
@@ -882,7 +882,7 @@ function renderSaves(){
   if(!a.length){
     const p=document.createElement("li");
     p.style.border="0";p.style.padding="0";
-    p.innerHTML='<span class="empty">Nothing saved yet. Build a board in Edit and press Save situation.</span>';
+    p.innerHTML='<span class="empty">Nothing saved yet. Build a board in Edit and press Save board.</span>';
     ul.appendChild(p);
     return;
   }
