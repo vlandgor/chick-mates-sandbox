@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=Public+Sans:wght@400;600&display=swap">
 <style>
 /* Layout: single column — board first, controls stacked beneath, panels collapse */
+:root{
   --bg:#f2f4f1; --panel:#ffffff; --ink:#1d2420; --muted:#66736c;
   --line:#d9dfda; --grass:#cfe0c3; --grass2:#c4d8b6; --water:#7fa8c9;
   --accent:#e2a32b; --danger:#c4553d; --good:#4f8f58;
@@ -260,7 +261,6 @@ ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;co
   <button class="btn" id="bUndo">Undo</button>
   <button class="btn" id="bReset">Reset</button>
   <button class="btn" id="bAnalyse">Analyse difficulty</button>
-  <button class="btn" id="bAnalyze">Analyze difficulty</button>
   <button class="btn" id="bTurn">Bump turns: both chicks</button>
 </div>
 
@@ -286,11 +286,6 @@ ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;co
     <button class="btn" id="bSave">Save board</button>
     <button class="btn" id="bClear">Clear board</button>
   </div>
-</details>
-
-<details id="dDiff" hidden>
-  <summary>Difficulty report</summary>
-  <div id="diffBody"></div>
 </details>
 
 <details id="dJson">
@@ -1425,91 +1420,7 @@ document.getElementById("bUndo").onclick=()=>{
   const o=JSON.parse(p); game=o.g; msg=o.m; won=false; render();
 };
 document.getElementById("bReset").onclick=()=>{game=JSON.parse(JSON.stringify(level));game.steps=0;initEagle(game);undoStack=[];msg=null;won=false;render();};
-document.getElementById("bAnalyze").onclick=e=>{
-  const d=document.getElementById("dDiff"), body=document.getElementById("diffBody");
-  d.hidden=false; d.open=true;
-  body.innerHTML='<p class="note">Searching the state space\u2026</p>';
-  e.target.disabled=true;
-  setTimeout(()=>{
-    let r;
-    try{ r=analyse(level); }
-    catch(err){ body.innerHTML='<p class="note warn">Analysis failed: '+err.message+'</p>';
-                e.target.disabled=false; return; }
-    body.innerHTML=reportHTML(r);
-    e.target.disabled=false;
-    d.scrollIntoView({block:"nearest",behavior:"smooth"});
-  },30);
-};
 
-function fact(label,val){return `<div class="fact"><span>${label}</span><b>${val}</b></div>`;}
-function barRow(label,val,weight){
-  return `<div class="bar"><span>${label}</span>`+
-    `<span class="track"><span class="fill" style="width:${Math.round(val)}%"></span></span>`+
-    `<span class="w">${Math.round(val)}</span></div>`;
-}
-function reportHTML(r){
-  if(!r.solvable)
-    return '<p class="note warn"><b>No solution found.</b> '+
-      (r.truncated
-        ? 'The search hit its state cap of '+r.states.toLocaleString()+
-          ' positions, so the level may still be solvable by a longer route than this can reach.'
-        : 'Every one of the '+r.states.toLocaleString()+
-          ' reachable positions was explored and none completes the level.')+
-      '</p>';
-  const m=r.mech, k=r.kinds;
-  const names=[];
-  if(m.boxes)names.push(m.boxes+" box"+(m.boxes>1?"es":""));
-  if(m.gates)names.push(m.gates+" gate"+(m.gates>1?"s":""));
-  if(m.fences)names.push(m.fences+" fence"+(m.fences>1?"s":""));
-  if(m.bears)names.push(m.bears+" bear"+(m.bears>1?"s":""));
-  if(m.coyote)names.push("coyote");
-  if(m.eagle)names.push("eagle");
-  if(m.water)names.push("water");
-  if(m.berries)names.push(m.berries+" berr"+(m.berries>1?"ies":"y"));
-  if(m.rabbit)names.push("rabbit");
-
-  return `
-<div class="score">
-  <b>${r.out10.toFixed(1)}</b><span class="of">/ 10</span>
-  <span class="pill">${r.band}</span>
-  <span class="of">${Math.round(r.score)} / 100 internal</span>
-</div>
-
-<div class="bars">
-  ${barRow("Solution length",r.parts.solution,25)}
-  ${barRow("Decisions",r.parts.decision,25)}
-  ${barRow("Dead-end risk",r.parts.deadEnd,20)}
-  ${barRow("Mechanics",r.parts.mechanic,20)}
-</div>
-
-<div class="facts">
-  ${fact("Shortest solution",r.steps+" steps")}
-  ${fact("Shortest routes",r.solCount)}
-  ${fact("Reachable states",r.states.toLocaleString())}
-  ${fact("Decision points",r.decisions)}
-  ${fact("Unwinnable",r.stuckPct+"%")}
-  ${fact("Branching",r.branching.toFixed(2))}
-  ${fact("Hand-offs",r.coordination)}
-  ${fact("Losing moves",r.deaths)}
-</div>
-
-<p class="note">
-  <b>Solution:</b> <code>${r.path}</code><br>
-  <b>Presses:</b> ${k.move} moves, ${k.push} pushes, ${k.swing} gate swings, ${k.turn} turn-arounds.<br>
-  <b>On the board:</b> ${names.length?names.join(", "):"nothing but the chicks and the coops"}.
-  ${r.stuckPct>=25?'<br><span class="warn"><b>Watch out:</b> '+r.stuckPct+
-    '% of reachable positions can no longer be won \u2014 easy to wreck by accident.</span>':""}
-  ${r.truncated?'<br><span class="warn">The search hit its cap, so the state counts are a floor, not a total.</span>':""}
-</p>
-
-<p class="note">
-  Weighted 25/25/20/20 after the proposal, renormalised over the four automated
-  categories \u2014 the 10% playtest slot has no data behind it yet. Scored out of
-  100 for resolution and shown out of 10, since the finer figure implies a
-  precision this cannot support. Treat it as a way to compare levels and catch
-  outliers, not as a verdict.
-</p>`;
-}
 
 document.getElementById("bTurn").onclick=e=>{sharedTurn=!sharedTurn;
   e.target.textContent="Bump turns: "+(sharedTurn?"both chicks":"bumped chick only");render();};
