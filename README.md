@@ -91,7 +91,17 @@ playtested. Promote them as you play them.
 
 Status changes you make live in this browser, keyed by level name, so they
 follow the page rather than the files. The files carry the status they were
-generated with.
+generated with until you publish.
+
+**Publish to repo** (JSON panel) commits the status you set in this browser
+into `levels/` on main, as one commit through the GitHub API. Only levels
+whose status was set in this browser are written, so publishing from a fresh
+browser demotes nothing. Unity's *Chick Mates > Levels > Sync Ready Levels From
+Sandbox* reads the repo, so: mark ready → Publish → Sync.
+
+It needs a fine-grained GitHub token with **Contents: read and write** on this
+repository only, set once per browser with **GitHub token**. It is stored in
+that browser's localStorage and sent only to api.github.com.
 
 ## Tools
 

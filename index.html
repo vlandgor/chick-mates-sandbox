@@ -298,6 +298,15 @@ ul.saves button{font:600 .72rem var(--font-b);border:0;background:transparent;co
     <button class="btn" id="bCopy">Copy</button>
     <button class="btn" id="bReady">Export ready levels</button>
   </div>
+  <label>Publish to the repo</label>
+  <p class="hint">Writes the status you set here into levels/ on GitHub as one commit, so Unity's
+    Sync Ready Levels From Sandbox can see it. Only levels whose status you set in this browser
+    are written.</p>
+  <div class="row">
+    <button class="btn" id="bPublish">Publish to repo</button>
+    <button class="btn" id="bToken">GitHub token</button>
+  </div>
+  <p class="hint" id="publishMsg"></p>
 </details>
 </main>
 
@@ -1670,6 +1679,82 @@ document.getElementById("bSave").onclick=()=>{
   const copy=JSON.parse(JSON.stringify(level));
   copy.status=statusOf(level);
   a.push(copy);putSaves(a);renderSaves();
+};
+
+/* ---------- publish to the repo ----------
+   Status lives in this browser (cm_status), but Unity's sync reads the repo,
+   so a level marked ready here means nothing to Unity until it is committed.
+   This commits every Level_NN level whose status was set in this browser,
+   with that status, into levels/ on main, as one commit through the GitHub
+   API. Levels this browser never touched are left as the repo has them, so
+   publishing from a fresh browser cannot demote anything.
+   Needs a fine-grained token with Contents: read and write on this repo
+   only. It is kept in this browser's localStorage and sent only to
+   api.github.com. */
+const REPO="vlandgor/chick-mates-sandbox", BRANCH="main";
+function ghToken(){try{return localStorage.getItem("cm_gh_token")||""}catch(_){return ""}}
+function setGhToken(t){try{if(t)localStorage.setItem("cm_gh_token",t);else localStorage.removeItem("cm_gh_token");}catch(_){}}
+function askToken(){
+  const t=prompt("GitHub fine-grained token for "+REPO+" (Contents: read and write).\n"+
+    "Stored only in this browser. Leave empty to remove it.",ghToken());
+  if(t!==null)setGhToken(t.trim());
+}
+async function gh(path,opt){
+  const headers={"Authorization":"Bearer "+ghToken(),"Accept":"application/vnd.github+json"};
+  if(opt&&opt.body)headers["Content-Type"]="application/json";
+  const r=await fetch("https://api.github.com/repos/"+REPO+path,{...(opt||{}),headers});
+  const body=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(r.status+" "+(body.message||r.statusText));
+  return body;
+}
+function publishSet(){
+  const set=loadStatus();
+  const byName={};
+  for(const o of allLevels()){
+    if(!/^Level_\d+$/.test(o.name||""))continue;
+    if(!(o.name in set))continue;
+    byName[o.name]=o;                         /* a saved board beats the campaign copy of the same name */
+  }
+  return Object.keys(byName).sort().map(n=>byName[n]);
+}
+async function publish(btn){
+  const out=document.getElementById("publishMsg");
+  if(!ghToken())askToken();
+  if(!ghToken()){out.textContent="No token, nothing published.";return;}
+  const set=publishSet();
+  if(!set.length){out.textContent="Nothing to publish: no Level_NN status has been set in this browser.";return;}
+  const ready=set.filter(o=>o.status==="ready").map(o=>o.name);
+  const readyText=ready.length?ready.join(", "):"none";
+  btn.disabled=true; out.textContent="Publishing "+set.length+" level(s)…";
+  try{
+    const ref=await gh("/git/ref/heads/"+BRANCH);
+    const head=ref.object.sha;
+    const commit=await gh("/git/commits/"+head);
+    const tree=await gh("/git/trees",{method:"POST",body:JSON.stringify({
+      base_tree:commit.tree.sha,
+      tree:set.map(o=>({path:"levels/"+o.name+".json",mode:"100644",type:"blob",
+                        content:JSON.stringify(o,null,1)}))})});
+    if(tree.sha===commit.tree.sha){
+      out.textContent="The repo already matches this browser. Ready: "+readyText+".";
+      return;
+    }
+    const made=await gh("/git/commits",{method:"POST",body:JSON.stringify({
+      message:"Publish level status from the sandbox ("+ready.length+" ready)",
+      tree:tree.sha,parents:[head]})});
+    await gh("/git/refs/heads/"+BRANCH,{method:"PATCH",body:JSON.stringify({sha:made.sha})});
+    out.textContent="Published as "+made.sha.slice(0,7)+". Ready: "+readyText+
+      ". Now run Chick Mates > Levels > Sync Ready Levels From Sandbox in Unity.";
+  }catch(e){
+    const m=String(e.message);
+    out.textContent="Publish failed: "+m+
+      (m.startsWith("401")?" The token was rejected; set it again with GitHub token.":"")+
+      (m.startsWith("403")||m.startsWith("404")?" The token needs Contents: read and write on "+REPO+".":"");
+  }finally{btn.disabled=false;}
+}
+document.getElementById("bPublish").onclick=e=>publish(e.target);
+document.getElementById("bToken").onclick=()=>{
+  askToken();
+  document.getElementById("publishMsg").textContent=ghToken()?"Token saved in this browser.":"No token stored.";
 };
 
 level=fixLevel(JSON.parse(JSON.stringify(CAMPAIGN[0])));
