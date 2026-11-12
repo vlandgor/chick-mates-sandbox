@@ -510,5 +510,5 @@
  },
  "rabbit": null,
  "type": "recovery",
- "status": "draft"
+ "status": "ready"
 }
